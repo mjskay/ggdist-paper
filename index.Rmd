@@ -1,17 +1,10 @@
 ---
-title: "Global Illumination for Fun and Profit"
+title: "ggdist: Visualizations of Distributions and Uncertainty in the Grammar of Graphics"
 
 author: 
-  - name: "Roy G. Biv"
-    institution: Starbucks Research
-    email: roy.g.biv@aol.com
-  - name: "Ed Grimley"
-    institution: Grimley Widgets, Inc
-    email: ed.grimley@aol.com
-    membership: Member, IEEE
-  - name: "Martha Stewart"
-    institution: Martha Stewart Enterprises at Microsoft Research
-    email: martha.stewart@marthastewart.com
+  - name: "Matthew Kay"
+    institution: Northwestern University
+    email: mjskay@northwestern.edu
 
 abstract: >
   Duis autem vel eum iriure dolor in hendrerit in vulputate
@@ -27,7 +20,7 @@ abstract: >
   accumsan et iusto odio dignissim qui blandit praesent luptatum zzril
   delenit augue duis dolore te feugait nulla facilisi.
 
-keywords: Radiosity, global illumination, constant time
+keywords: Uncertainty visualization, grammar of graphics
 
 # please declare the paper type of your paper to help reviewers, only shown in review mode
 # choices:
@@ -36,7 +29,7 @@ keywords: Radiosity, global illumination, constant time
 # * evaluation
 # * system
 # * theory/model
-papertype: please specify
+papertype: system
 
 bibliography: template.bib
 
