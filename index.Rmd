@@ -205,6 +205,11 @@ invidunt ut labore et dolore magna aliquyam erat, sed diam
 voluptua. At vero eos et accusam et justo duo dolores et ea
 rebum.
 
+A list:
+
+- item one
+- item two
+
 ## Mezcal Head
 
 ```{r sample, echo=FALSE, fig.cap="A sample of mtcars data"}
