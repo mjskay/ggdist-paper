@@ -1,0 +1,228 @@
+---
+title: "Global Illumination for Fun and Profit"
+
+author: 
+  - name: "Roy G. Biv"
+    institution: Starbucks Research
+    email: roy.g.biv@aol.com
+  - name: "Ed Grimley"
+    institution: Grimley Widgets, Inc
+    email: ed.grimley@aol.com
+    membership: Member, IEEE
+  - name: "Martha Stewart"
+    institution: Martha Stewart Enterprises at Microsoft Research
+    email: martha.stewart@marthastewart.com
+
+abstract: >
+  Duis autem vel eum iriure dolor in hendrerit in vulputate
+  velit esse molestie consequat, vel illum dolore eu feugiat nulla
+  facilisis at vero eros et accumsan et iusto odio dignissim qui blandit
+  praesent luptatum zzril delenit augue duis dolore te feugait nulla
+  facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit,
+  sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna
+  aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper
+  suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem
+  vel eum iriure dolor in hendrerit in vulputate velit esse molestie
+  consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et
+  accumsan et iusto odio dignissim qui blandit praesent luptatum zzril
+  delenit augue duis dolore te feugait nulla facilisi.
+
+keywords: Radiosity, global illumination, constant time
+
+# please declare the paper type of your paper to help reviewers, only shown in review mode
+# choices:
+# * algorithm/technique
+# * application/design study
+# * evaluation
+# * system
+# * theory/model
+papertype: please specify
+
+bibliography: template.bib
+
+output:
+  bookdown::pdf_document2:
+    template: template_rmd.tex
+    keep_tex: true
+    citation_package: natbib
+---
+
+```{r setup_output, include=FALSE}
+if (knitr::opts_knit$get('rmarkdown.pandoc.to') == 'latex') {
+  knitr::opts_chunk$set(
+    fig.width = 4.75,
+    fig.height = 3.25,
+    out.width = "100%",
+    dev = "cairo_pdf",
+    # out.extra ensures that knitr uses LaTeX code for figures
+    # see https://stackoverflow.com/questions/42486617/knitr-ignoring-fig-pos
+    out.extra = ''
+  )
+}
+```
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+
+This template is for papers of VGTC-sponsored conferences such as IEEE VIS, IEEE VR, and ISMAR which are published as special issues of TVCG. The template does not contain the respective dates of the conference/journal issue, these will be entered by IEEE as part of the publication production process. Therefore, **please leave the copyright statement at the bottom-left of this first page untouched**.
+
+This first section (without a section header) will automatically become the "Introduction" section.
+
+Here is a citation\ [@Max:1995:OMF; @Kitware:2003]. Add citations to `template.bib`.
+
+# Example Section
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
+sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
+rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem
+ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur
+sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et
+dolore magna aliquyam erat, sed diam
+voluptua\ [@Kitware:2003; @Max:1995:OMF]. At vero eos et accusam et
+justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
+takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
+amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
+invidunt ut labore et dolore magna aliquyam erat, sed diam
+voluptua. At vero eos et accusam et justo duo dolores et ea
+rebum. Stet clita kasd gubergren, no sea takimata sanctus est.
+
+# Exposition
+
+Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse
+molestie consequat, vel illum dolore eu feugiat nulla facilisis at
+vero eros et accumsan et iusto odio dignissim qui blandit praesent
+luptatum zzril delenit augue duis dolore te feugait nulla
+facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit,
+sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna
+aliquam erat volutpat\ \cite{Kindlmann:1999:SAG}.
+
+$$
+\sum_{j=1}^{z} j = \frac{z(z+1)}{2} 
+$$
+
+See also Table\ \@ref(tab:mtcars).
+
+```{r mtcars, echo = FALSE}
+knitr::kable(mtcars[1:5, 1:5], caption = "The mtcars data.")
+```
+
+Here is some code:
+
+```{r}
+x = 1:10
+x
+```
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
+sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
+rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem
+ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur
+sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et
+dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
+et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
+takimata sanctus est Lorem ipsum dolor sit amet.
+
+## Lorem ipsum
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
+sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
+rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem
+ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur
+sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et
+dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
+et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
+takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
+amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
+invidunt ut labore et dolore magna aliquyam erat, sed diam
+voluptua. At vero eos et accusam et justo duo dolores et ea
+rebum.
+
+## Mezcal Head
+
+```{r sample, echo=FALSE, fig.cap="A sample of mtcars data"}
+mtcars %>%
+  ggplot(aes(x = wt, y = mpg)) +
+  geom_point()
+```
+
+Lorem ipsum dolor sit amet (see Figure\ \@ref(fig:sample)), consetetur sadipscing elitr, sed diam
+nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
+sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
+rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem
+ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur
+sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et
+dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
+et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
+takimata sanctus est Lorem ipsum dolor sit amet.
+
+
+### Duis Autem
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
+sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
+rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem
+ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur
+sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et
+dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
+et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
+takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
+amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
+invidunt ut labore et dolore magna aliquyam erat, sed diam
+voluptua. At vero eos et accusam et justo duo dolores et ea
+rebum. Stet clita kasd gubergren, no sea takimata sanctus est. Lorem
+ipsum dolor sit amet.
+
+
+### Ejector Seat Reservation
+
+Duis autem\ [@Lorensen:1987:MCA]^[The algorithm behind
+Marching Cubes\ [@Lorensen:1987:MCA] had already been
+described by Wyvill et al.\ [@Wyvill:1986:DSS] a year
+earlier.] vel eum iriure dolor in hendrerit
+in vulputate velit esse molestie consequat,^[Footnotes
+appear at the bottom of the column.] vel illum dolore eu
+feugiat nulla facilisis at vero eros et accumsan et iusto odio
+dignissim qui blandit praesent luptatum zzril delenit augue duis
+dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet,
+consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt
+ut laoreet dolore magna aliquam erat volutpat.
+
+\paragraph{Confirmed Ejector Seat Reservation}
+
+Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper
+suscipit lobortis nisl ut aliquip ex ea commodo
+consequat\ [@Nielson:1991:TAD]. Duis autem vel eum iriure dolor in
+hendrerit in vulputate velit esse molestie consequat, vel illum dolore
+eu feugiat nulla facilisis at vero eros et accumsan et iusto odio
+dignissim qui blandit praesent luptatum zzril delenit augue duis
+dolore te feugait nulla facilisi.
+
+\paragraph{Rejected Ejector Seat Reservation}
+
+Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper
+suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem
+vel eum iriure dolor in hendrerit in vulputate velit esse molestie
+
+
+# Conclusion
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
+sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
+rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem
+ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur
+sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et
+dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
+et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
+takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
+amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
+invidunt ut labore et dolore magna aliquyam erat, sed diam
+voluptua. At vero eos et accusam et justo duo dolores et ea
+rebum.
