@@ -57,16 +57,85 @@ if (knitr::opts_knit$get('rmarkdown.pandoc.to') == 'latex') {
 ```{r setup, include=FALSE}
 library(ggplot2)
 library(dplyr)
+library(ggdist)
+library(magrittr)
+library(lubridate)
+library(readr)
+
+theme_set(theme_ggdist())
 ```
 
 
-This template is for papers of VGTC-sponsored conferences such as IEEE VIS, IEEE VR, and ISMAR which are published as special issues of TVCG. The template does not contain the respective dates of the conference/journal issue, these will be entered by IEEE as part of the publication production process. Therefore, **please leave the copyright statement at the bottom-left of this first page untouched**.
+- motivate uncertainty visualization, probabilistic visualization (esp in grammar of graphics)
+- cf. pgog, ggplot2 paper, vega-lite
+- pain to do in existing gog systems; pgog only attempt but focused on area visualizations and (some) dotplots (and there: limited)
+- basic idea: reify pdf, cdf, quantile function and make these available for mapping onto visual channels
 
-This first section (without a section header) will automatically become the "Introduction" section.
+- eval: discuss arc of project, usage over time, changes based on user needs etc (ref: munzner model, that paper on interactive systems)
 
-Here is a citation\ [@Max:1995:OMF; @Kitware:2003]. Add citations to `template.bib`.
+# Related work
 
-# Example Section
+## Grammar of graphics
+
+## Uncertainty visualization
+
+# Uncertainty visualization in the grammar of graphics
+
+- introduce formalism
+- note applicability to confidence distributions as well as probability distributions
+
+```{r cran_downloads, fig.width = 4.75/2, fig.height = 3.25/2, fig.caption = "Downloads of *ggdist* and *tidybayes* over time, as downloads per day, averaged within month."}
+if (!file.exists("data/cran_downloads.csv")) {
+  cran_downloads = cranlogs::cran_downloads(packages = c("tidybayes", "ggdist"), from = "2018-06-30", to = "2022-02-19")
+  write.csv(cran_downloads, file = "data/cran_downloads.csv", row.names = FALSE)
+}
+
+cran_downloads = read_csv("data/cran_downloads.csv", col_types = cols(
+  date = col_date(),
+  count = col_double(),
+  package = col_character()
+))
+
+refline_ = function(..., x, y, xend = x, yend = y) {
+  annotate("segment", x = x, y = y, xend = xend, yend = yend, ...)
+}
+
+label_ = function(..., color = "gray50", lineheight = 1) {
+  annotate("text", color = color, lineheight = lineheight, ...)
+}
+
+cran_downloads %>%
+  # ggdist was released on 2020-06-14, so just include that month onwards
+  filter(!(package == "ggdist" & date < "2020-06-01")) %>%
+  
+  # average within month
+  within(day(date) <- 1) %>%
+  group_by(package, date) %>%
+  summarise(count = mean(count), .groups = "drop") %>%
+  
+  ggplot(aes(x = date, y = count, color = package)) +
+  geom_line() +
+  geom_point() +
+  geom_text(
+    aes(label = package), 
+    data = . %>% filter(date == max(date)), 
+    hjust = 0,
+    vjust = 0.3,
+    position = position_nudge(x = 20)
+  ) +
+  refline_(x = as.Date("2020-06-01"), y = 0, yend = 300, alpha = 0.25) +
+  label_(x = as.Date("2020-06-01"), y = 310, label = "ggdist released\non CRAN", hjust = 0, vjust = 0) +
+  scale_color_brewer(palette = "Dark2") +
+  labs(
+    x = NULL,
+    y = "Average downloads per day"
+  ) +
+  guides(color = "none") +
+  scale_x_date(limits = as.Date(c("2018-06-01", "2022-10-01"))) +
+  coord_cartesian(expand = FALSE, clip = "off")
+```
+
+
 
 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
 nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
