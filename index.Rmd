@@ -84,7 +84,7 @@ theme_set(theme_ggdist())
 - introduce formalism
 - note applicability to confidence distributions as well as probability distributions
 
-```{r cran_downloads, fig.width = 4.75/2, fig.height = 3.25/2, fig.caption = "Downloads of *ggdist* and *tidybayes* over time, as downloads per day, averaged within month."}
+```{r cran-downloads, echo = FALSE, fig.cap = "Downloads of \\textit{ggdist} and \\textit{tidybayes} over time, as average downloads per day within each month. In June of 2020, the visualization functionality of \\textit{tidybayes} was split off into a new package, \\textit{ggdist}, to reflect its usefulness beyond just Bayesian modeling. As of this writing, \\textit{ggdist} averages about 9,000 downloads/month or 300 downloads/day."}
 if (!file.exists("data/cran_downloads.csv")) {
   cran_downloads = cranlogs::cran_downloads(packages = c("tidybayes", "ggdist"), from = "2018-06-30", to = "2022-02-19")
   write.csv(cran_downloads, file = "data/cran_downloads.csv", row.names = FALSE)
