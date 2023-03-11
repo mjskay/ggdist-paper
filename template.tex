@@ -37,29 +37,20 @@
 \vgtcpapertype{please specify}
 
 %% Paper title.
-\title{Global Illumination for Fun and Profit}
+\title{ggdist: Visualizations of Distributions and\\Uncertainty in the Grammar of Graphics}
 
 %% Author ORCID IDs should be specified using \authororcid like below inside
 %% of the \author command. ORCID IDs can be registered at https://orcid.org/.
 %% Include only the 16-digit dashed ID.
 \author{%
-  \authororcid{Josiah S.\ Carberry}{0000-0002-1825-0097},
-  Ed Grimley, and 
-  Martha Stewart
+  \authororcid{Matthew Kay}{0000-0001-9446-0419}
 }
 
 \authorfooter{
   %% insert punctuation at end of each item
   \item
-  	Josiah Carberry is with Brown University.
-  	E-mail: jcarberry@example.com
-  \item
-  	Ed Grimley is with Grimley Widgets, Inc.
-  	E-mail: ed.grimley@example.com.
-
-  \item Martha Stewart is with Martha Stewart Enterprises at Microsoft
-  Research.
-  	E-mail: martha.stewart@example.com.
+  	Matthew Kay is with Northwestern University.
+  	E-mail: mjskay@northwestern.edu
 }
 
 %% Abstract section.
@@ -73,7 +64,7 @@
 
 %% Keywords that describe your work. Will show as 'Index Terms' in journal
 %% please capitalize first letter and insert punctuation after last keyword
-\keywords{Radiosity, global illumination, constant time}
+\keywords{Uncertainty visualization, distributions, grammar of graphics}
 
 %% A teaser figure can be included as follows
 \teaser{
@@ -108,12 +99,28 @@
 \usepackage{tabu}                      % only used for the table example
 \usepackage{booktabs}                  % only used for the table example
 \usepackage{lipsum}                    % used to generate placeholder text
-\usepackage{mwe}                       % used to generate placeholder figures
+\usepackage{mwe}         % used to generate placeholder figures
+\usepackage{amsmath}
+\usepackage{verbatim}
+\usepackage{varwidth}
 
 %% We encourage the use of mathptmx for consistent usage of times font
 %% throughout the proceedings. However, if you encounter conflicts
 %% with other math-related packages, you may want to disable it.
 \usepackage{mathptmx}                  % use matching math font
+
+\newenvironment{centerverbatim}{%
+  \hfill\break
+  \centering
+  \varwidth{\linewidth}%
+  \verbatim
+}{%
+  \endverbatim
+  \endvarwidth
+  \par
+  \hfill\break
+}
+\newcommand{\dollar}{\$}
 
 \begin{document}
 
@@ -130,28 +137,202 @@
 
 
 %% \section{Introduction} %for journal use above \firstsection{..} instead
-This template is for papers of VGTC-sponsored conferences such as IEEE VIS, IEEE VR, and ISMAR which are published as special issues of TVCG.
-The template does not contain the respective dates of the conference/journal issue, these will be entered by IEEE as part of the publication production process.
-Therefore, \textbf{please leave the copyright statement at the bottom-left of this first page untouched}.
 
+Uncertainty visualization, generally speaking, has only basic support in existing implementations of the grammar of graphics. Popular implementations like \textit{ggplot2}, \textit{Vega-lite}, and \textit{Observable Plot} typically provide versions of error bars (for points), uncertainty bands (for lines), boxplots, and density plots. Research in uncertainty visualization has long revealed problems with all of these representations and proposed a variety of alternative uncertainty representations to replace them. Examples include quantile dotplots, gradient error bars, gradient plots, gradient bands, and eye plots. Yet, most of these alternative representations are---simply put---painful to convince existing grammar of graphics implementations to produce.
 
-\section{Author Details}
+\textit{ggdist} is an attempt to rectify this situation. It started under the guise of \textit{tidybayes}---an R package I wrote for post-processing Bayesian models for use with \textit{ggplot2}---in about 2016. I published \textit{tidybayes} to CRAN (the Comprehensive R Archive Network) in 2018, and it slowly gained some use in the Bayesian statistics community. However, the package had two complementary, but not always perfectly aligned, use cases: post-processing Bayesian model output for visualization, and uncertainty visualization in the grammar of graphics. The latter is bigger than \textit{just} Bayesian statistics: everyone needs to visualize uncertainty! And, contrary to popular opinion---as I'll demonstrate later---Bayesian and frequentist uncertainty visualization can in fact be done within the same framework. Recognizing this broader need, in 2020 I spun off the uncertainty visualization components of \textit{tidybayes} into a new package, \textit{ggdist}, and published it to CRAN. Since then it has steadily grown in use inside and outside the Bayesian statistics community in R, and now averages about 14,000 downloads per month (best described as ``modest'' for an R package).
 
-Authors should specify ORCID IDs (see \url{https://orcid.org/}  to register) for author disambiguation and long-term contact preservation.
-Use \verb|\authororcid{Author Name}{0000-0000-0000-0000}| for each author, replacing the ``Author Name'' and using the 16-digit (hyphenated) ORCID ID for the second parameter.
-The template shows an example without ORCID IDs for two of the authors.
-ORCID IDs should be provided in all cases.
+Over the course of its continuing development, I have learned a lot about how to integrate uncertainty visualization into the grammar of graphics, and developed a formal way of describing that integration (more on that later). In the spirit of recent retrospectives on visualization system design, I'd like to distill down some of what I've learned here.~\footnote{And in the spirit of this being a retrospective, I'm keeping the tone informal. I think that's more honest; and besides, after two years of a pandemic, I at least need a break from stilted academic writing. I hope you do too! If not, whatever.} Ultimately, what would be nice to have---and what I hope to demonstrate \textit{ggdist} to be---is a coherent extension to the grammar of graphics that makes it easy to create the various proposed alternative uncertainty visualizations from the literature, \textit{and more}. By  ``and more'' I mean: not only should we be able to express a variety of uncertainty visualizations through a single coherent framework, but that framework should be complete enough that someone else can wander along and express new uncertainty visualization types we've never thought of before (and importantly I---as the creator of \textit{ggdist}---have never thought of before). I'll do this by grounding the design of \textit{ggdist} in a formal representation of uncertainty through mappings of functions of distributions onto visual channels or \textit{aesthetics}. Naturally I can't provide direct evidence that visualization types I've never seen before can be created with \textit{ggdist}, but as a proxy, I will describe instances in which I have encountered uncertainty visualizations in the literature and subsequently realized they were straightforward to express in \textit{ggdist}.
 
-Each author's affiliations have to be provided in the author footer on the bottom-left corner of the first page.
-It is permitted to merge two or more people from the same institution as long as they are shown in the same order as in the overall author sequence on the top of the first page.
-For example, if authors A, B, C, and D are from institutions 1, 2, 1, and 2, respectively, then it is ok to use 2 bullets as follows:
+Ultimately, given the huge expressive power of the grammar of graphics and the popularity of tools built on it, I hope a catalog of my experiences here might provide a catalyst for improved implementations of uncertainty visualization to flourish in existing grammar of graphics ecosystems. Let's give it a try.
+
+\section{Setting the stage}
+
+\subsection{A simplified notation for the grammar of graphics}
+
+To be able to talk more generally than a specific grammar of graphics implementation, we'll at least need a formal way of writing down visualization specifications separated from a particular implementation. I'll adopt here a notation that I've found works pretty well when I teach the grammar of graphics to undergraduates,\footnote{I've used a variation on this when teaching \textit{ggplot2}, \textit{Vega-lite}, \textit{Altair}, and \textit{Tableau} and found students pick it up easily.} which is at least some evidence it might be easy for folks to understand. The core notation describes a visualization in terms of its \textit{data variables}, \textit{aesthetic mappings}, and \textit{geometries}. We create a scatterplot, for example, by mapping one variable onto the \textit{x} axis and another onto the \textit{y} axis:
+\begin{align*}
+\mathit{weight} &\rightarrow x\\
+\mathit{mpg} &\rightarrow y\\
+\textsc{geom} &= \mathit{point}
+\end{align*}
+
+This notation sets up two \textit{aesthetic mappings}:\footnote{Or in \textit{Vega-lite} parlance, \textit{encodings}} a mapping from the \textit{weight} data variable onto the \textit{x} aesthetic, and a mapping from the \textit{mpg} data variable onto the \textit{y} aesthetic. It then employs a \textit{point} geometry for display. I like this notation because it emphasizes that we are creating \textit{functions} from data space to aesthetic (display) space; in grammar of graphics parlance these are \textit{scale} functions which can themselves be specified (e.g., to set up log scales, to pick how colors are assigned to data values, etc). Other notations obscure this key insight into the structure of the grammar of graphics by, e.g., placing the aesthetic first and ``assigning'' data variables to it with $=$, which gives an incorrect intuition in my view. In fact, let's see that now: here is a translation of the above into \textit{ggplot2} code, assuming \texttt{cars} is a data frame with \texttt{weight} and \texttt{mpg} columns:
+
+\begin{centerverbatim}
+ggplot(cars) +
+  aes(
+    x = weight,
+    y = mpg
+  ) +
+  geom_point()
+\end{centerverbatim}
+
+Or in \textit{Vega-lite}:\footnote{I use the Vega-lite \textsc{api} instead of its \textsc{json} form, as \textsc{json} is a horrifying mess of visual noise, and no sane human should want to read or write it. The Vega-lite \textsc{api} is a notable improvement, though without R's facility for capturing and re-writing abstract syntax trees, it can't quite reach the succinctness of \textit{ggplot2}---this is a fundamental limitation of trying to write domain-specific languages in JavaScript.}
+
+\begin{centerverbatim}
+vl.data("path/to/cars.json")
+  .encode(
+    vl.x().fieldQ("weight"),
+    vl.y().fieldQ("mpg")
+  )
+  .markPoint()
+\end{centerverbatim}
+
+This shows the close correspondence between the abstract notation above and the particulars of code in actual grammar of graphics implementations. Throughout the rest of this paper, I'll stick to the abstract notation and corresponding \textit{ggplot2} + \textit{ggdist} code for the particulars.
+
+\subsection{Uncertainty visualization in the grammar of graphics, as she is spoke}
+
+Speaking of existing implementations of the grammar of graphics, how do they implement uncertainty visualization? Rudimentarily, I would say.
+
+One natural approach to uncertainty visualization is to assume a Gaussian approximation: to represent all estimates and their uncertainty as a mean and standard deviation. This makes the specification problem easy: instead of mapping a single value onto the \textit{x} aesthetic, say, we map a point estimate onto \textit{x} and provide an aesthetic for its standard deviation; call it $x_\textsc{sd}$. Say we had estimated a variable $a$ and had quantified its standard error (i.e. the standard deviation of its sampling distribution) as $\sigma_a$, we might plot a point with an error bar using a \textit{pointinterval} geometry as follows:
+\begin{align*}
+a &\rightarrow x\\
+\sigma_a &\rightarrow x_\textsc{sd}\\
+\textsc{geom} &= \mathit{pointinterval}
+\end{align*}
+
+This is one approach taken by \textit{Vega-lite}: it provides an \texttt{errorbar}\footnote{\texttt{errorbar} is, in my view, a misnomer, as is \texttt{xError}: fundamentally, the mark calculates a Gaussian interval, which might be for a distribution being used to represent error in an estimate, but might not. \textit{Error} is not the generic notion at play; a standard deviation is; and the generic mark is an interval, not an error bar.} mark (analogous to \textit{pointinterval}) and an \texttt{xError}  channel (analogous to $x_\textsc{sd}$). Thus, I'll refer to this notation as the $\{x, x_\textsc{sd}\}$ approach.
+
+The problem, fundamentally, is that not all uncertainty is well-represented by a Gaussian distribution. For example, consider uncertainty in a proportion (bounded at 0 and 1, thus as estimates approach the boundary the interval becomes asymmetric---yet Gaussian intervals must be symmetric) or uncertainty in a variance parameter (bounded below at 0). Or, consider the ubiquitous Student-\textit{t} confidence interval: as the degrees of freedom go to $\infty$, a Student-\textit{t} distribution is well approximated by the Normal, but with low degrees of freedom (incidentally common in small-\textit{n} studies---like at \textsc{vis}), the tails of the distribution become fatter, and the Normal distribution is a poor approximation. Thus, a more general approach is needed.
+
+The obvious alternative, at least for interval representations, is to simply specify the endpoints of the intervals; e.g. for a 95\% Gaussian interval:
+
+\begin{align*}
+a &\rightarrow x\\
+a - 1.96 \cdot \sigma_a &\rightarrow x_\textsc{min}\\
+a + 1.96 \cdot \sigma_a &\rightarrow x_\textsc{max}\\
+\textsc{geom} &= \mathit{pointinterval}
+\end{align*}
+
+Here, the magic values $-1.96$ and $+1.96$ are the $(1-95\%/2) = 2.5\%$th and $(1+95\%/2) = 97.5\%$th quantiles of the standard Normal distribution, thus yielding a $97.5\% - 2.5\% = 95\%$ interval. This is generic in the sense that any interval can be represented, but unsatisfying in the sense that we seem to have lost some level of abstraction that was present when we were just thinking in terms of estimates and their variances. These also require that the user knows how to make these calculations. Both \textit{ggplot2} (with \texttt{geom\_pointrange}) and \textit{Vega-lite} (with the \texttt{x} and \texttt{x2} channels supplied to \texttt{errorbar}) offer a variant of this solution. 
+
+I will offer a different solution: to instead represent intervals as properties of a distribution, allowing us to neatly handle both the simple case of Gaussian error and more complex cases. Centering distributions---not standard deviations or intervals---in the specification of uncertainty will also allow us to build a richer set of uncertainty representations.
+
+\section{Uncertainty visualization as distributional visualization}
+
+\subsection{Intervals}
+
+Imagine we represent an uncertain value generically as a distribution, or a random variable, $A$. Importantly, I do not consider this a \textit{probability} distribution necessarily: it could be a probability distribution, but it could also be a \textit{confidence} distribution, which is a frequentist generalization of sampling distributions and bootstrap distributions~\textbf{CITE}. Its defining characteristic will be that it has a cumulative distribution function (\textsc{cdf}), $F_A(x)$, which is:
 \begin{itemize}
-  \item A and C are with Institution 1. E-mail: \{a\,$|$\,c\}@i1.com\,.
-
-  \item B and D are with Institution 2. E-mail: \{b\,$|$\,d\}@i2.org\,.
+    \item For a probability distribution, $F_A(x) = \Pr(A \le x)$, the probability that $A$ is less than or equal to $x$.
+    \item   For a confidence distribution, $F_A(x) = \gamma$  is the confidence $\gamma$ at which $x$ would be the upper limit of a one-sided $\gamma\%$ confidence interval, $[-\infty, x]$, for $A$. That sentence is pretty typical of convoluted frequentist definitions, so it might be easier to think in terms of the inverse: $F_A^{-1}(\gamma)$ yields the value $x$, which is the upper limit of a one-sided $\gamma\%$ confidence interval on $A$: $[-\infty,x]$.
 \end{itemize}
 
+For either representation, we may also be interested in other functions of the distribution as well. These include the derivative of the cumulative distribution function, i.e. the density function (or the mass function, if the distribution is discrete), $f_A(x)$, as well as the inverse of the \textsc{cdf} (also known as the quantile function), $F_A^{-1}(x)$. Given these functions, we can generate a variety of uncertainty representations, including but not limited to density plots and intervals.
 
+For example, a median and $\gamma\%$ quantile interval could be defined generically on any distribution $A$ as follows:
+
+\begin{align*}
+\operatorname{median}(A) &\rightarrow x\\
+F_A^{-1}\left(\frac{1 - \gamma}{2}\right) &\rightarrow x_\textsc{min}\\
+F_A^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
+\textsc{geom} &= \mathit{pointinterval}
+\end{align*}
+
+If $A$ is a probability distribution, this is a Bayesian \textit{credible }interval, and if $A$ is a confidence distribution, this is a frequentist $confidence$ interval. This lets us abstract over the petty battles between this or that statistical camp and get to the meaningful business of visualizing uncertainty. This also allows us something not present in other attempts so far: to make it easy to specific multiple interval sizes, and to map interval size itself onto an aesthetic. For example, if we wanted to show two intervals, a 95\% and a 66\%, where the smaller interval is shown as a thicker line, we could write:
+
+
+\begin{align*}
+\operatorname{median}(A) &\rightarrow x\\
+F_A^{-1}\left(\frac{1 - \gamma}{2}\right) &\rightarrow x_\textsc{min}\\
+F_A^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
+-\gamma &\rightarrow \mathit{linewidth}\\
+\textsc{geom} &= \mathit{pointinterval}\\
+\gamma &\in \{0.66, 0.95\}
+\end{align*}
+
+This is a not uncommon approach that tries to avoid dichotomous thinking by showing multiple intervals with of different masses. It also has the nice grammar-of-graphics-ish property of mapping the mass ($\gamma$) onto the width of the interval, instead of creating two explicit, separate layers, each specifying a different interval---it makes the mass into \textit{data}.\footnote{I learned at least two useful things from a class I took on relational databases way back in undergrad, one being that it's always better for data to be in rows than in column names of tables, an insight called \textit{tidy data} by some statisticians~\textbf{CITE} and which relates to what database people call \textit{normal forms}~\textbf{CITE}, though I have long since forgotten the meanings of the various subtypes of normal forms. The other useful thing is that you are rarely at Google scale, so you are almost always better off with a relational database with proper transactions than some dumb old key value store, a lesson my grad students refuse to learn until they build a webapp to collect data from 300 participants using some newfangled database they aren't the target users for, and end up with garbage data.} This will make it easy to generalize to other visualizations, e.g. by mapping mass onto \textit{color} instead of \textit{linewidth}.
+
+On the other hand, this is still a bit low-level: it requires the user knows how to calculate interval endpoints from the quantile function. This also limits us specifically to quantile intervals, when other intervals types, such as highest-density intervals~\textbf{CITE} and shortest intervals~\textbf{CITE}, might be preferable. Thus, \textit{ggdist} also supplies a \textit{stat} version of \textit{pointinterval}, which bundles up some statistical calculations and default aesthetic mappings with a \textit{pointinterval} geometry. All \textit{stat}s in \textit{ggdist} support the $x_\textsc{dist}$ and $y_\textsc{dist}$ aesthetics, onto which distribution objects can be mapped. They also allow the user to specify the type of point and interval used, and generate the corresponding values and mappings for $x$, $x_\textsc{min}$, $x_\textsc{max}$, and \textit{linewidth}. This changes the specification to something like:
+
+
+\begin{align*}
+A &\rightarrow x_\textsc{dist}\\
+\textsc{stat} &= \mathit{pointinterval}\\
+\textsc{point} &= \mathit{median}\\
+\textsc{interval} &= \textit{quantile interval}\\
+\gamma &\in \{0.66, 0.95\}
+\end{align*}
+
+The representation of the distribution $A$ could be a sample-based representation, e.g. a bunch of draws from a Bayesian posterior or from a bootstrap distribution, or it could be an object representing a theoretical distribution in terms of its parameters, such as a Normal distribution with a defined mean and standard deviation. Point estimates and interval types can be defined by arbitrary functions of distributions, and predefined functions for mean, median, and mode, and quantile, highest-density, and shortest intervals are provided. This generalizes the $\{x, x_\textsc{sd}\}$ approach used by \textit{Vega-lite} to any distribution type while abstracting over the specifics of how point estimates and intervals are calculated.
+
+In implementation, \textit{ggdist} allows distributions to be represented by numeric vectors (sample-based representation), objects from the \textit{distributional } R package (which supports theoretical distributions), and \texttt{rvar} objects from the \textit{posterior} R package (a sample-based representation that mimics numeric arrays in R). For example, if we re-create the $\{x, x_\textsc{sd}\}$ representation abstractly thus:
+
+
+\begin{align*}
+\operatorname{Normal}(a, \sigma_a) &\rightarrow x_\textsc{dist}\\
+\textsc{stat} &= \mathit{pointinterval}\\
+\textsc{point} &= \mathit{median}\\
+\textsc{interval} &= \textit{quantile interval}\\
+\gamma &\in \{0.66, 0.95\}
+\end{align*}
+
+In \textit{ggdist}, using \texttt{distributional::dist\_normal}, this is:
+
+\begin{centerverbatim}
+ggplot(data) +
+  aes(xdist = dist_normal(a, sigma_a)) +
+  stat_pointinterval(
+    point_interval = median_qi, 
+    .width = c(.66, .95)
+  )
+\end{centerverbatim}
+
+These happen to be the default values for \texttt{point\_interval} and \texttt{.width} ($\gamma$\footnote{For historical reasons that have to do with a combination of a very long discussion with a bunch of people on the Stan forums~\textbf{CITE} and naming conventions in some R \textsc{api}s for fixed arguments to functions with variable argument lists~\textbf{CITE}, $\gamma$ in \textit{ggdist} is spelled \texttt{.width}. Reflecting on my past mistakes, a better name would be  \texttt{mass}.}), so just \texttt{stat\_pointinterval()}  also works here. To demonstrate generalizing this approach, consider the very common need of placing uncertainty intervals on the results of a $t$-test, which can be derived from a $t_\nu(\mu, \sigma)$  distribution with $\nu$ degrees of freedom, scale $\mu$ (e.g. an estimated mean), and scale $\sigma$ (e.g. a standard error). Given these three numbers in a data frame, a visualization specification might be:
+
+
+\begin{align*}
+t_{\nu_a}(a, \sigma_a) &\rightarrow x_\textsc{dist}\\
+\textsc{stat} &= \mathit{pointinterval}
+\end{align*}
+Which in \textit{ggdist} is:
+
+\begin{centerverbatim}
+ggplot(data) +
+  aes(xdist = dist_student_t(nu_a, a, sigma_a)) +
+  stat_pointinterval()
+\end{centerverbatim}
+
+\subsection{Ribbons}
+
+Once we have interval representations, it is straightforward to develop uncertainty band representations. Imagine a regression that models car miles per gallon based on weight (the details of the function $g$ are not important):
+
+\[
+\log(\mathit{mpg}) \sim \operatorname{Normal}\left(g(\mathit{weight}), \sigma\right)
+\]
+Such a model could provide a predictive distribution for a car's miles per gallon conditional on its weight: $p(\mathit{mpg} \mid \mathit{weight})$, which we might want to plot alongside the raw data. If a \textit{lineribbon} is a geometry combining a line with an arbitrary number of uncertainty bands around it, abstractly, we want something like this:
+
+\begin{align*}
+\mathit{weight} &\rightarrow x\\
+p(\mathit{mpg} \mid \mathit{weight}) &\rightarrow y_\textsc{dist}\\
+\gamma &\rightarrow \mathit{fill}\\
+\textsc{stat} &= \mathit{lineribbon}\\
+\gamma &\in \{0.50, 0.80, 0.95\}
+\end{align*}
+Assuming \texttt{m}  is a Bayesian version of such a model fit using the \textit{brms} or \textit{rstanarm} modeling packages in R, and \texttt{preds} is a data frame of desired \textit{weight} values to predict on, we can add a column to \texttt{preds} that contains a random variable representation of $p(\mathit{mpg} \mid \mathit{weight})$ using \texttt{brms::posterior\_predict} and the \texttt{posterior::rvar}  data type. The latter is a data type I created\footnote{This was a slightly insane idea in itself, given the way that base R data types work. As R's classes work based on generic \textit{functions}, rather than classes with a well-defined set of methods, this requires tracking down all the various functions implemented to work with arrays and vectors in the language and providing implementations for them for random variable arrays. Indexing functions especially are annoying, as there are half a dozen different ways to index into R arrays, each with their own corner cases (especially when missing data is involved!). Anyway.} specifically to wrap large samples that represent distributions into objects that mimic R vectors and arrays, and which can be added to data frames:
+
+\begin{centerverbatim}
+preds = preds |> mutate(
+  mpg_given_weight = rvar(posterior_predict(m, preds)
+)
+\end{centerverbatim}
+
+Given this data frame, we can plot it as follows (adding a \textit{point} layer to show the original data too):
+
+\begin{centerverbatim}
+ggplot(preds) +
+  aes(x = weight) +
+  stat_lineribbon(aes(ydist = mpg_given_weight)) +
+  geom_point(aes(y = mpg), data = cars) +
+  scale_fill_brewer()
+\end{centerverbatim}
+
+\textit{lineribbon} defaults to \texttt{.width = c(.5, .8, .95)} and maps the resulting \texttt{.width} onto the \texttt{fill} aesthetic, so we do not need to specify the \texttt{fill} mapping (though we can override this default). \texttt{scale\_fill\_brewer} is not necessary, but swaps in a nicer (in this context) ColorBrewer Blues~\textbf{CITE} palette in place of the default Viridis palette~\textbf{CITE}.
+
+Once we have a multiple-ribbon geometry, it becomes easy to create other uncertainty visualization types, like gradient fan charts~\textbf{CITE}. For example, we could use a large number of intervals, say $k = 50$ or $100$, and generate $k$  evenly-spaced interval widths between 0 and 1 (not including 0 or 1): $\gamma = \{(1 - 0.5)/k, \dots, (k - 0.5)/k\}$. This is the \texttt{ppoints(k)} function in R, so we can simply write \texttt{stat\_lineribbon(.width = ppoints(100))} to get a gradient fan chart with 100 intervals. This steams directly from my choice to make $\gamma$ into data, and is one example of support for a chart type that was a happy accident of \textit{ggdist}'s design.
+
+ 
 \section{Hyperlinks and Cross References}
 
 The style uses the \verb|hyperref| package which can typeset clickable hyperlinks using \verb|\href{...}{...}|, hyperlinked URLs using \verb|\url{...}|, and turns references into internal links.
