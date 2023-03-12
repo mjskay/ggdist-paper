@@ -359,10 +359,11 @@ Helske-like violin intervals:
 ```{r slab_violin_interval, fig.width = 2.5, fig.height = 1.5}
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
-  stat_slab(aes(alpha = after_stat(level)), side = "both", .width = c(.5, .8, .95, .99, 1)) +
+  stat_slab(aes(fill = after_stat(level)), side = "both", .width = c(.5, .8, .95, 1)) +
   scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
   scale_y_discrete(expand = expansion(0.15)) +
-  guides(alpha = "none") +
+  scale_fill_brewer() +
+  guides(fill = "none") +
   labs(x = NULL)
 
 p
