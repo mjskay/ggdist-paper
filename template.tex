@@ -283,10 +283,26 @@ F_A^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
 
 This is a not uncommon approach that tries to avoid dichotomous thinking by showing multiple intervals of different masses. It also has the nice grammar-of-graphics-ish property of mapping the mass ($\gamma$) onto the width of the line, instead of creating two explicit, separate layers, each specifying a different interval---it makes the mass into \textit{data}.\footnote{I learned at least two useful things from a relational databases class in undergrad: (1) it's always better to put data into rows than into column names of tables---an insight that stems from database \textit{normal forms}~\textbf{CITE} (distinctions between which I have long forgotten) or what some statisticians call \textit{tidy data}~\textbf{CITE}; and (2) you are rarely at Google scale, so you're probably better off with a relational database with proper transactions than some dumb old key value store. The latter lesson my grad students refuse to learn until they build a webapp to collect data from 300 participants using some newfangled database they aren't the target users for, and end up with garbage. Kids these days, etc.} This also makes it easy to generalize to other visualizations, e.g. by modifying the previous specification to map mass onto \textit{color} instead of \textit{linewidth}:
 
-\textbf{TODO: example of intervals using color}
 
-On the other hand, this is still a bit low-level: it requires the user to know how to calculate interval endpoints from the quantile function. This also limits us specifically to quantile intervals, when other intervals types, such as highest-density intervals~\textbf{CITE} and shortest intervals~\textbf{CITE}, might be preferable. Thus, \textit{ggdist} also supplies a \textit{stat} version of \textit{pointinterval}, which bundles up some statistical calculations and default aesthetic mappings with a \textit{pointinterval} geometry. All \textit{stat}s in \textit{ggdist} support the $x_\textsc{dist}$ and $y_\textsc{dist}$ aesthetics, onto which distribution objects can be mapped. They also allow the user to specify the type of point and interval used, and generate the corresponding values and mappings for $x$, $x_\textsc{min}$, $x_\textsc{max}$, and \textit{linewidth}. This changes the specification to something like:
+\begin{minipage}{.5\columnwidth}
 
+\begin{align*}
+-\gamma &\rightarrow \mathit{color}\\
+\textsc{geom} &= \mathit{pointinterval}\\
+\gamma &\in \{0.50, 0.80, 0.95\}
+\end{align*}
+\end{minipage}%
+  \begin{minipage}{.4\columnwidth}
+    \centering
+    \includegraphics[width=1.2\columnwidth]{figs/3-stat_pointinterval_color.pdf}
+  \end{minipage}
+\hfill\break
+
+
+On the other hand, these are still a bit low-level: they require the user to know how to calculate interval endpoints from the quantile function. This also limits us specifically to quantile intervals, when other intervals types, such as highest-density intervals~\textbf{CITE} and shortest intervals~\textbf{CITE}, might be preferable. Thus, \textit{ggdist} also supplies a \textit{stat} version of \textit{pointinterval}, which bundles up some statistical calculations and default aesthetic mappings with the \textit{pointinterval} geometry. All \textit{stat}s in \textit{ggdist} support the $x_\textsc{dist}$ and $y_\textsc{dist}$ aesthetics, onto which objects that represent distributions can be mapped. They also allow the user to specify the type of point and interval used, and generate the corresponding values and mappings for $x$, $x_\textsc{min}$, $x_\textsc{max}$, and \textit{linewidth}. This changes the specification to something like:
+
+
+\begin{minipage}{.5\columnwidth}
 
 \begin{align*}
 A &\rightarrow x_\textsc{dist}\\
@@ -295,6 +311,12 @@ A &\rightarrow x_\textsc{dist}\\
 \textsc{interval} &= \textit{quantile interval}\\
 \gamma &\in \{0.66, 0.95\}
 \end{align*}
+\end{minipage}%
+  \begin{minipage}{.4\columnwidth}
+    \centering
+    \includegraphics[width=1.2\columnwidth]{figs/3-stat_pointinterval_}
+  \end{minipage}
+\hfill\break
 
 The representation of the distribution $A$ could be a sample-based representation, e.g. a bunch of draws from a Bayesian posterior or from a bootstrap distribution, or it could be an object representing a theoretical distribution in terms of its parameters, such as a Normal distribution with a defined mean and standard deviation. Point estimates and interval types can be defined by arbitrary functions of distributions, and predefined functions for mean, median, and mode, and quantile, highest-density, and shortest intervals are provided. This generalizes the $\{x, x_\textsc{sd}\}$ approach used by \textit{Vega-lite} to any distribution type while abstracting over the specifics of how point estimates and intervals are calculated.
 
