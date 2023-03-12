@@ -162,7 +162,7 @@ To be able to talk more generally than a specific grammar of graphics implementa
   \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[height=\columnwidth]{figs/2-mpg_v_weight.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/2-mpg_v_weight.pdf}
   \end{minipage}
 
 
@@ -206,7 +206,7 @@ a &\rightarrow x\\
   \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[height=\columnwidth]{figs/2-mean_sd_interval.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/2-mean_sd_interval.pdf}
   \end{minipage}
 
 This is one approach taken by \textit{Vega-lite}: it provides an \texttt{errorbar}\footnote{\texttt{errorbar} is, in my view, a misnomer, as is \texttt{xError}: fundamentally, the mark calculates a Gaussian interval, which might be for a distribution being used to represent error in an estimate, but might not. \textit{Error} is not the generic notion at play; a standard deviation is; and the generic mark is an interval, not an error bar.} mark (analogous to \textit{pointinterval}) and an \texttt{xError}  channel (analogous to $x_\textsc{sd}$). Thus, I'll refer to this notation as the $\{x, x_\textsc{sd}\}$ approach.
