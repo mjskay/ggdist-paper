@@ -151,11 +151,20 @@ Ultimately, given the huge expressive power of the grammar of graphics and the p
 \subsection{A simplified notation for the grammar of graphics}
 
 To be able to talk more generally than a specific grammar of graphics implementation, we'll at least need a formal way of writing down visualization specifications separated from a particular implementation. I'll adopt here a notation that I've found works pretty well when I teach the grammar of graphics to undergraduates,\footnote{I've used a variation on this when teaching \textit{ggplot2}, \textit{Vega-lite}, \textit{Altair}, and \textit{Tableau} and found students pick it up easily.} which is at least some evidence it might be easy for folks to understand. The core notation describes a visualization in terms of its \textit{data variables}, \textit{aesthetic mappings}, and \textit{geometries}. We create a scatterplot, for example, by mapping one variable onto the \textit{x} axis and another onto the \textit{y} axis:
-\begin{align*}
+
+\hfill\break
+  \begin{minipage}{.5\columnwidth}
+    \begin{align*}
 \mathit{weight} &\rightarrow x\\
 \mathit{mpg} &\rightarrow y\\
 \textsc{geom} &= \mathit{point}
 \end{align*}
+  \end{minipage}%
+  \begin{minipage}{.4\columnwidth}
+    \centering
+    \includegraphics[height=\columnwidth]{figs/2-mpg_v_weight.pdf}
+  \end{minipage}
+
 
 This notation sets up two \textit{aesthetic mappings}:\footnote{Or in \textit{Vega-lite} parlance, \textit{encodings}} a mapping from the \textit{weight} data variable onto the \textit{x} aesthetic, and a mapping from the \textit{mpg} data variable onto the \textit{y} aesthetic. It then employs a \textit{point} geometry for display. I like this notation because it emphasizes that we are creating \textit{functions} from data space to aesthetic (display) space; in grammar of graphics parlance these are \textit{scale} functions which can themselves be specified (e.g., to set up log scales, to pick how colors are assigned to data values, etc). Other notations obscure this key insight into the structure of the grammar of graphics by, e.g., placing the aesthetic first and ``assigning'' data variables to it with $=$, which gives an incorrect intuition in my view. In fact, let's see that now: here is a translation of the above into \textit{ggplot2} code, assuming \texttt{cars} is a data frame with \texttt{weight} and \texttt{mpg} columns:
 
