@@ -495,7 +495,7 @@ Which translates naturally to \texttt{aes(alpha = !!p\_(x))}. Fine fine, but let
 \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[width=1.2\columnwidth]{figs/3-slab_gradient_two_groups.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/3-slab_gradient_correll.pdf}
   \end{minipage}
 \hfill\break
 
@@ -503,9 +503,9 @@ In \textit{ggdist} this function is either:
 \begin{itemize}
     \item \texttt{-pmax(abs(2*after\_stat(cdf) - 1), .95)} or
     \item    \texttt{-pmax(abs(2*!!Pr\_(X <= x) - 1), .95)}, using the probability expression mini-\textsc{dsl}.
-Thus, \textit{ggdist} can create this particularly weird uncertainty visualization from the literature. But let's get \textit{weirder}: in 2021, Helske et al~\cite{helske2021can}, inspired by Correll and Gleicher
-\end{itemize},
- proposed combining this gradient tail with a violin plot. We can do that by adding back in the density-to-thickness mapping, and use the \textsc{side} parameter, which specifies if the slab should be drawn on the \textit{top} side (default), \textit{bottom} side, or \textit{both}:
+\end{itemize}
+
+Thus, \textit{ggdist} can create this particularly weird uncertainty visualization from the literature. But let's get \textit{weirder}: in 2021, Helske et al~\cite{helske2021can}, inspired by Correll and Gleicher, proposed combining this gradient tail with a violin plot. We can do that by adding back in the density-to-thickness mapping, and use the \textsc{side} parameter, which specifies if the slab should be drawn on the \textit{top} side (default), \textit{bottom} side, or \textit{both}:
 
  \begin{minipage}{.5\columnwidth}
 
@@ -518,7 +518,7 @@ f_M(x) &\rightarrow \textit{thickness}\\
 \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[width=1.2\columnwidth]{figs/3-slab_gradient_two_groups.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/3-slab_violin_gradient.pdf}
   \end{minipage}
 \hfill\break
 
@@ -537,7 +537,7 @@ f_M(x) &\rightarrow \textit{thickness}\\
 \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[width=1.2\columnwidth]{figs/3-slab_gradient_two_groups.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/3-slab_violin_interval.pdf}
   \end{minipage}
 \hfill\break
 
@@ -557,7 +557,7 @@ Another variation on violin plots is the \textit{raindrop plot} of Barrowman and
 \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[width=1.2\columnwidth]{figs/3-slab_gradient_two_groups.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/3-slab_raindrop.pdf}
   \end{minipage}
 \hfill\break
 
@@ -581,7 +581,7 @@ Another interesting\footnote{\textsc{aka} weird.}\footnote{Yes, there are a lot 
 \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[width=1.2\columnwidth]{figs/3-slab_gradient_two_groups.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/3-slab_fuzzygram.pdf}
   \end{minipage}
 \hfill\break
 
