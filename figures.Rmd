@@ -53,6 +53,13 @@ bracket_ = function(..., x, xend = x, y, yend = y, color = label_color) {
     ...
   )
 }
+arrow_ = function(..., curvature = 0, x, xend = x, y, yend = y, color = label_color) {
+  annotate("curve", 
+    color = color, arrow = arrow(angle = 45, length = unit(3, "points"), type = "closed"),
+    curvature = curvature,
+    x = x, xend = xend, y = y, yend = yend
+  )
+}
 label_ = function(..., hjust = 0, color = label_color) {
   annotate("text",
     color = color, hjust = hjust, lineheight = 1,
@@ -103,6 +110,22 @@ p
 ggsave("figs/2-mean_sd_interval.pdf", device = cairo_pdf)
 ```
 
+```{r 2-xmin_xmax_interval, fig.height = 1.25, fig.width = 2.5}
+p = data.frame(a = dist_normal(0, 1)) |>
+  ggplot(aes(xdist = a)) +
+  stat_pointinterval(.width = .95) +
+  scale_y_continuous(breaks = NULL) +
+  scale_x_continuous(breaks = NULL) +
+  label_(label = "italic(a)", x = 0, y = 0.18, hjust = 0.5, parse = TRUE) +
+  arrow_(x = -1.96, y = -0.2, yend = -0.06) +
+  label_(label = "italic(a - 1.96%.%sigma[a])", x = -2.03, y = -0.3, hjust = 0, parse = TRUE) +
+  arrow_(x = 1.96, y = -0.2, yend = -0.06) +
+  label_(label = "italic(a + 1.96%.%sigma[a])", x = 2.06, y = -0.3, hjust = 1, parse = TRUE) +
+  labs(y = NULL)
+
+p
+ggsave("figs/2-xmin_xmax_interval.pdf", device = cairo_pdf)
+```
 
 
 ## Session Info
