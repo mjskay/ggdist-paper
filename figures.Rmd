@@ -178,6 +178,46 @@ ggsave("figs/3-stat_pointinterval_color.pdf", device = cairo_pdf)
 ```
 
 
+```{r 3-stat_pointinterval_A, fig.height = 2, fig.width = 2.5}
+p = data.frame(a = dist_normal(0, 1)) |>
+  ggplot(aes(xdist = a)) +
+  stat_pointinterval() +
+  scale_y_continuous(breaks = NULL) +
+  scale_x_continuous(breaks = NULL, limits = c(-2.5, 2.5)) +
+  label_(label = "A", x = 0, y = 0.15, hjust = 0.5, vjust = 1) +
+  labs(y = NULL, x = NULL)
+
+p
+ggsave("figs/3-stat_pointinterval_A.pdf", device = cairo_pdf)
+```
+
+```{r 3-stat_pointinterval_normal, fig.height = 2, fig.width = 2.5}
+p = data.frame(a = dist_normal(0, 1)) |>
+  ggplot(aes(xdist = a)) +
+  stat_pointinterval() +
+  scale_y_continuous(breaks = NULL) +
+  scale_x_continuous(breaks = NULL, limits = c(-2.5, 2.5)) +
+  label_(label = "Normal(italic(a), italic(sigma[a]))", x = 0, y = 0.15, hjust = 0.5, vjust = 1, parse = TRUE) +
+  labs(y = NULL, x = NULL)
+
+p
+ggsave("figs/3-stat_pointinterval_normal.pdf", device = cairo_pdf)
+```
+
+```{r 3-stat_pointinterval_student_t, fig.height = 1, fig.width = 2.5}
+p = data.frame(a = dist_student_t(6, 0, 1)) |>
+  ggplot(aes(xdist = a)) +
+  stat_pointinterval() +
+  scale_y_continuous(breaks = NULL) +
+  scale_x_continuous(breaks = NULL, limits = c(-2.5, 2.5)) +
+  label_(label = "italic(t[nu[a]])(italic(a), italic(sigma[a]))", x = 0, y = 0.35, hjust = 0.5, vjust = 1, parse = TRUE) +
+  labs(y = NULL, x = NULL)
+
+p
+ggsave("figs/3-stat_pointinterval_student_t.pdf", device = cairo_pdf)
+```
+
+
 ## Session Info
 
 This file was built with the following setup:
