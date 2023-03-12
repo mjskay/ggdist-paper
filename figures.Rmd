@@ -358,7 +358,7 @@ Helske-like violin intervals:
 ```{r slab_violin_interval, fig.width = 2.5, fig.height = 1.5}
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
-  stat_slab(aes(alpha = after_stat(level)), side = "both", fill_type = "gradient", .width = c(.5, .8, .95, .99, 1)) +
+  stat_slab(aes(alpha = after_stat(level)), side = "both", .width = c(.5, .8, .95, .99, 1)) +
   scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
   scale_y_discrete(expand = expansion(0.15)) +
   guides(alpha = "none") +
@@ -373,14 +373,30 @@ Raindrop plots:
 ```{r slab_raindrop, fig.width = 2.5, fig.height = 1.5}
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
-  stat_eye(aes(thickness = after_stat(ifelse(.width <= .95, log(pdf), NA))), normalize = "groups", side = "both") +
+  stat_eye(aes(thickness = after_stat(ifelse(.width <= .95, log(pdf), NA))), normalize = "groups", .width = .95) +
   scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
   scale_y_discrete(expand = expansion(0.15)) +
   guides(alpha = "none") +
   labs(x = NULL)
 
 p
-ggsave("figs/3-slab_violin_interval.pdf", device = cairo_pdf)
+ggsave("figs/3-slab_raindrop.pdf", device = cairo_pdf)
+```
+
+Fuzzygrams:
+
+```{r slab_fuzzygram, fig.width = 2.5, fig.height = 1.5}
+p = two_a |>
+  ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
+  stat_slab(aes(alpha = !!Pr_(X > x)), thickness = 1, side = "both", fill_type = "gradient", scale = 0.7) +
+  stat_pointinterval() +
+  scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
+  scale_y_discrete(expand = expansion(0.15)) +
+  scale_alpha_continuous(range = c(0, 1), guide = "none") +
+  labs(x = NULL)
+
+p
+ggsave("figs/3-slab_fuzzygram.pdf", device = cairo_pdf)
 ```
 
 ## Session Info
