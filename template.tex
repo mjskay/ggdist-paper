@@ -155,6 +155,7 @@ Ultimately, given the huge expressive power of the grammar of graphics and the p
 To be able to talk more generally than a specific grammar of graphics implementation, we'll at least need a formal way of writing down visualization specifications separated from a particular implementation. I'll adopt here a notation that I've found works pretty well when I teach the grammar of graphics to undergraduates. I've used a variation on this notation when teaching \textit{ggplot2}, \textit{Vega-lite}, \textit{Altair}, and \textit{Tableau} and found students pick it up easily, which is at least some evidence it might be easy for folks to understand. The core notation describes a visualization in terms of its \textit{data variables}, \textit{aesthetic mappings}, and \textit{geometries}. We create a scatterplot, for example, by mapping one variable onto the \textit{x} aesthetic and another onto the \textit{y} aesthetic:
 
 \hfill\break
+\noindent
   \begin{minipage}{.5\columnwidth}
     \begin{align*}
 \mathit{weight} &\rightarrow x\\
@@ -179,7 +180,7 @@ ggplot(cars) +
   geom_point()
 \end{centerverbatim}
 
-Or in \textit{Vega-lite}:\footnote{I use the Vega-lite \textsc{api} instead of its \textsc{json} form, as \textsc{json} is a horrifying mess of visual noise, and no sane human should want to read or write it. The Vega-lite \textsc{api} is a notable improvement, though without R's facility for capturing and re-writing abstract syntax trees, it can't quite reach the succinctness of \textit{ggplot2}---though this is a fundamental limitation of trying to write domain-specific languages in JavaScript, and no fault of the \textit{Vega-lite} authors, who have done an excellent job with the language they've been given.}
+Or in \textit{Vega-lite}:\footnote{I use the Vega-lite \textsc{api} instead of its \textsc{json} form, as \textsc{json} is a horrifying mess of visual noise that no sane human should want to read or write. The Vega-lite \textsc{api} is a notable improvement, though without R's facility for capturing and re-writing abstract syntax trees, it doesn't quite reach the succinctness of \textit{ggplot2}. This seems to be a fundamental limitation when writing domain-specific languages in JavaScript, and the \textit{Vega-lite} authors have done an excellent job with the language they've been given.}
 
 \begin{centerverbatim}
 vl.data("path/to/cars.json")
@@ -194,12 +195,12 @@ This shows the close correspondence between the abstract notation above and the 
 
 \subsection{Uncertainty visualization in the grammar of graphics, as she is spoke}
 
-Speaking of existing implementations of the grammar of graphics, how do they implement uncertainty visualization? Rudimentarily, I would argue.
+Speaking of existing implementations of the grammar of graphics, how do they implement uncertainty visualization? Rudimentarily, I think.
 
 One natural approach to uncertainty visualization is to assume a Gaussian approximation: to represent all estimates and their uncertainty as a mean and standard deviation. This makes the specification problem easy: instead of mapping a single value onto the \textit{x} aesthetic, say, we map a point estimate onto \textit{x} and provide an aesthetic for its standard deviation; call it $x_\textsc{sd}$. Say we had estimated a variable $a$ and had quantified its standard error (i.e. the standard deviation of its sampling distribution) as $\sigma_a$, we might plot a point with an error bar using a \textit{pointinterval} geometry as follows, yielding a 95\% interval calculated from a Normal distribution with mean $a$ and standard deviation $\sigma_a$:
 
-\hfill\break
-  \begin{minipage}{.5\columnwidth}
+\noindent
+\begin{minipage}{.5\columnwidth}
 \begin{align*}
 a &\rightarrow x\\
 \sigma_a &\rightarrow x_\textsc{sd}\\
@@ -217,7 +218,8 @@ The problem, fundamentally, is that not all uncertainty is well-represented by a
 
 The obvious alternative, at least for interval representations, is to simply specify the endpoints of the intervals; e.g. for a 95\% Gaussian interval:
 
-  \begin{minipage}{.5\columnwidth}
+\noindent
+\begin{minipage}{.5\columnwidth}
 \begin{align*}
 a &\rightarrow x\\
 a - 1.96 \cdot \sigma_a &\rightarrow x_\textsc{min}\\
@@ -231,7 +233,7 @@ a + 1.96 \cdot \sigma_a &\rightarrow x_\textsc{max}\\
   \end{minipage}
 \hfill\break
 
-Here, the magic values $-1.96$ and $+1.96$ are the $(1-95\%/2) = 2.5\%$th and $(1+95\%/2) = 97.5\%$th quantiles of the standard Normal distribution, thus yielding a $97.5\% - 2.5\% = 95\%$ interval. This is generic in the sense that any interval can be represented, but unsatisfying in the sense that we seem to have lost some level of abstraction that was present when we were just thinking in terms of estimates and their variances. These also require that the user knows how to make these calculations. Both \textit{ggplot2} (with \texttt{geom\_pointrange}) and \textit{Vega-lite} (with the \texttt{x} and \texttt{x2} channels supplied to \texttt{errorbar}) offer a variant of this solution for pre-calculated intervals. 
+Here, the magic values $-1.96$ and $+1.96$ are the $(1-95\%/2) = 2.5\%$th and $(1+95\%/2) = 97.5\%$th quantiles of the standard Normal distribution, thus yielding a $97.5\% - 2.5\% = 95\%$ interval. This is generic in the sense that any interval can be represented, but unsatisfying in the sense that we seem to have lost some level of abstraction that was present when we were just thinking in terms of estimates and their variances. This approach also requires that the user knows how to make these calculations. Both \textit{ggplot2} (with \texttt{geom\_pointrange}) and \textit{Vega-lite} (with the \texttt{x} and \texttt{x2} channels supplied to \texttt{errorbar}) offer a variant of this solution for pre-calculated intervals. 
 
 I will offer a different solution: to instead represent intervals as properties of a distribution, allowing us to neatly handle both the simple case of Gaussian error and more complex cases. Centering distributions---not standard deviations or intervals---in the specification of uncertainty will also allow us to build a richer set of uncertainty representations.
 
@@ -249,6 +251,7 @@ For either representation, we may also be interested in other functions of the d
 
 For example, a median and $\gamma\%$ quantile interval could be defined generically on any distribution $A$ as follows:
 
+\noindent
 \begin{minipage}{.5\columnwidth}
 \begin{align*}
 \operatorname{median}(A) &\rightarrow x\\
@@ -265,6 +268,7 @@ F_A^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
 
 If $A$ is a probability distribution, this is a Bayesian \textit{credible }interval, and if $A$ is a confidence distribution, this is a frequentist \textit{confidence} interval. This lets us abstract over the petty battles between this or that statistical camp and get to the meaningful business of visualizing uncertainty. This also allows us something not present in other attempts so far: to make it easy to specific multiple interval sizes, and to map interval size itself onto an aesthetic. For example, if we\footnote{Yes yes, I am using both ``I'' and ``we'' in this paper. ``I'' is me, and ``we'' is the conspiratorial ``we'': I'd like to hope you'll come with me on the journey of trying to sort out reasonable ways of visualizing uncertainty.} wanted to show two intervals, a 95\% and a 66\%, where the smaller interval is shown as a thicker line, we could write:
 
+\noindent
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
@@ -285,6 +289,7 @@ F_A^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
 This is a not uncommon approach that tries to avoid dichotomous thinking by showing multiple intervals of different masses. It also has the nice grammar-of-graphics-ish property of mapping the mass ($\gamma$) onto the width of the line, instead of creating two explicit, separate layers, each specifying a different interval---it makes the mass into \textit{data}.\footnote{I learned at least two useful things from a relational databases class in undergrad: (1) it's always better to put data into rows than into column names of tables---an insight that stems from database \textit{normal forms}~\textbf{CITE} (distinctions between which I have long forgotten) or what some statisticians call \textit{tidy data}~\textbf{CITE}; and (2) you are rarely at Google scale, so you're probably better off with a relational database with proper transactions than some dumb old key value store. The latter lesson my grad students refuse to learn until they build a webapp to collect data from 300 participants using some newfangled database they aren't the target users for, and end up with garbage. Kids these days, etc.} This also makes it easy to generalize to other visualizations, e.g. by modifying the previous specification to map mass onto \textit{color} instead of \textit{linewidth}:
 
 
+\noindent
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
@@ -303,6 +308,7 @@ This is a not uncommon approach that tries to avoid dichotomous thinking by show
 On the other hand, these are still a bit low-level: they require the user to know how to calculate interval endpoints from the quantile function. This also limits us specifically to quantile intervals, when other intervals types, such as highest-density intervals~\textbf{CITE} and shortest intervals~\textbf{CITE}, might be preferable. Thus, \textit{ggdist} also supplies a \textit{stat} version of \textit{pointinterval}, which bundles up some statistical calculations and default aesthetic mappings with the \textit{pointinterval} geometry. All \textit{stat}s in \textit{ggdist} support the $x_\textsc{dist}$ and $y_\textsc{dist}$ aesthetics, onto which objects that represent distributions can be mapped. They also allow the user to specify the type of point and interval used, and generate the corresponding values and mappings for $x$, $x_\textsc{min}$, $x_\textsc{max}$, and \textit{linewidth}. This changes the specification to something like:
 
 
+\noindent
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
@@ -323,6 +329,7 @@ The representation of the distribution $A$ could be a sample-based representatio
 
 In implementation, \textit{ggdist} allows distributions to be represented by numeric vectors (sample-based representation), objects from the \textit{distributional } R package (which supports theoretical distributions), and \texttt{rvar} objects from the \textit{posterior} R package (a sample-based representation that mimics numeric arrays in R). For example, if we re-create the $\{x, x_\textsc{sd}\}$ representation abstractly thus:
 
+\noindent
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
@@ -352,6 +359,7 @@ ggplot(data) +
 
 These happen to be the default values for \texttt{point\_interval} and \texttt{.width} ($\gamma$),\footnote{For historical reasons that have to do with a combination of a very long discussion with a bunch of people on the Stan forums~\textbf{CITE} and naming conventions in some R \textsc{api}s for fixed arguments to functions with variable argument lists~\textbf{CITE}, $\gamma$ in \textit{ggdist} is spelled \texttt{.width}. Reflecting on my past mistakes, a better name would be  \texttt{mass}.} so just \texttt{stat\_pointinterval()}  also works here. To demonstrate generalizing this approach, consider the very common need of placing uncertainty intervals on the results of a $t$-test, which can be derived from a $t_\nu(\mu, \sigma)$  distribution with $\nu$ degrees of freedom, scale $\mu$ (e.g. an estimated mean), and scale $\sigma$ (e.g. a standard error). Given these three numbers in a data frame, a visualization specification might be:
 
+\noindent
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
@@ -383,6 +391,7 @@ Once we have \textit{pointinterval} representations, it is straightforward to de
 \]
 Such a model could provide a predictive distribution for a car's miles per gallon conditional on its weight: $p(\mathit{mpg} \mid \mathit{weight})$, which we might want to plot alongside the raw data. If a \textit{lineribbon} is a geometry combining a line with an arbitrary number of uncertainty bands around it, abstractly, we want something like this:
 
+\noindent
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
@@ -418,6 +427,7 @@ ggplot(preds) +
 
 \texttt{stat\_lineribbon} defaults to \texttt{.width = c(.5, .8, .95)} and maps the resulting \texttt{.width} onto the \texttt{fill} aesthetic, so we do not need to specify \texttt{.width} or the \texttt{fill} mapping for this example. Once we have a multiple-ribbon geometry, it is easy to create other uncertainty visualization types, like gradient fan charts~\textbf{CITE}. For example, we could use a large number of intervals, say $k = 50$ or $100$, with masses between 0 and 1 (exclusive):
 
+\noindent
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
@@ -467,7 +477,7 @@ This is the default output of \texttt{stat\_slab()} in \textit{ggdist}, which ma
     \item \texttt{aes(thickness = !!p\_(x))}:  This uses a small domain-specific language for probability expressions I added to \textit{ggdist}, and is intended to more closely mimic a mapping like $p(x) \rightarrow thickness$ in code. The \texttt{!!} pseudo-operator comes from the \textit{rlang} meta-programming R package, and performs \textit{unquotation}~\textbf{CITE}: it inserts the expression returned by \texttt{p\_(x)}, which in this case is \texttt{after\_stat(pdf)}, into the \texttt{aes} call.\footnote{I added this syntax relatively recently, when \textit{ggplot2} deprecated \texttt{stat()}, which used to be a synonym for \texttt{after\_stat()}. This (1) made expressions with \texttt{after\_stat} needlessly verbose and (2) replaced a declarative verb, \texttt{stat}---which indicates the type of expression at play but not when it is computed---with a procedural verb, \texttt{after\_stat}. I feel that this name change violates the declarative foundations of \textit{ggplot2}, and the mini-\textsc{dsl} for probabilistic expressions in \textit{ggdist} is my small protest against it.}
 \end{enumerate}
 
-Slab geometries have several useful properties which help make them useful for creating a variety of uncertainty visualizations. One important property is that the \textit{alpha} (opacity), \textit{fill}, and outline \textit{color} aesthetics of the slabs can have data values mapped onto them at a sub-geometry level.\footnote{Just as an implementation note, this happens to be an incredible pain in the ass. Prior to R 4.1, the R graphics engine did not have proper gradient support, so this involved manually sub-dividing geometries and interpolating thickness values at cutpoints between contiguous blocks of color. Now, with proper gradient support in some R graphics engines (e.g. \textsc{svg} and \textsc{pdf}), \textit{ggdist} can output high-quality color gradients, and as of this writing is one of the only R packages to do so (even base \textit{ggplot2} has not implemented it yet).} This functionality, combined with the ability to map arbitrary distribution functions, means we can easily recreate a bunch of visualizations from the literature. The obvious first example would be a color gradient plot~\textbf{CITE}, by mapping density onto \textit{alpha}:
+Slab geometries have several useful properties which help make them useful for creating a variety of uncertainty visualizations. One important property is that the \textit{alpha} (opacity), \textit{fill}, and outline \textit{color} aesthetics of the slabs can have data values mapped onto them at a sub-geometry level.\footnote{Just as an implementation note, this happens to be an incredible pain in the ass. Prior to R 4.1, the R graphics engine did not have proper gradient support, so this involved manually sub-dividing geometries and interpolating thickness values at cutpoints between contiguous blocks of color. Now, with proper gradient support in some R graphics output formats (e.g. \textsc{svg} and \textsc{pdf}), \textit{ggdist} can output high-quality color gradients, and as of this writing is one of the only R packages to do so (even base \textit{ggplot2} has not implemented it yet).} This functionality, combined with the ability to map arbitrary distribution functions, means we can easily recreate a bunch of visualizations from the literature. The obvious first example would be a color gradient plot~\textbf{CITE}, by mapping density onto \textit{alpha}:
 
 
 \noindent
@@ -508,7 +518,7 @@ In \textit{ggdist} this function is either:
     \item    \texttt{-pmax(abs(2*!!Pr\_(X <= x) - 1), .95)}, using the probability expression mini-\textsc{dsl}.
 \end{itemize}
 
-Thus, \textit{ggdist} can create this particularly weird uncertainty visualization from the literature. But let's get \textit{weirder}: in 2021, Helske et al~\cite{helske2021can}, inspired by Correll and Gleicher, proposed combining this gradient tail with a violin plot. We can do that by adding back in the density-to-thickness mapping, and use the \textsc{side} parameter, which specifies if the slab should be drawn on the \textit{top} side (default), \textit{bottom} side, or \textit{both}. I'll also adjust the tails to fade outside the 85\% interval, since otherwise the fading is hard to see in the skinny tails of the violin:
+Thus, \textit{ggdist} can create this particularly weird uncertainty visualization without breaking the bonds of its core abstraction. But let's get \textit{weirder}: in 2021, Helske et al~\cite{helske2021can}, inspired by Correll and Gleicher, proposed combining this gradient tail with a violin plot. We can do that by adding back in the density-to-thickness mapping, and use the \textsc{side} parameter, which specifies if the slab should be drawn on the \textit{top} side (default), \textit{bottom} side, or \textit{both}. I'll also adjust the tails to fade outside the 85\% interval, since otherwise the fading is hard to see in the skinny tails of the violin:
 
  \noindent
 \begin{minipage}{.5\columnwidth}
@@ -573,7 +583,7 @@ stat_slab(side = "both", normalize = "groups")
 
 Where \texttt{normalize = "groups"} is needed to tell the slab to normalize thickness on a per-group basis, as log-density does not have a natural zero point.
 
-Another interesting\footnote{\textsc{aka} weird.}\footnote{Yes, there are a lot of footnotes. No, I don't care.} uncertainty visualization from the literature is Haber and Wilkinson's~\cite{haber1982perceptual} \textit{fuzzygram}, i.e. a \textit{fuzzy histogram} (or more generally, a \textit{fuzzy bar chart}). This chart type has what I would call a compelling \textit{generative story}: that is, an explanation you can give for how the uncertainty encoding in the chart arises based on how it is constructed. Imagine we want to add uncertainty to a bar chart, and we have a distribution for the uncertainty in the value encoded in each bar. Now say we generate a large number of semi-transparent bar charts from these distributions, and overlay them all on top of each other. As the number of charts approaches $\infty$, the stack of overlapping bars for each value will begin to resemble the complementary \textsc{cdf}, $1 - F(x)$, of that distribution. That insight leads to the following encoding (with a \textit{pointinterval} overlaid for reference):
+Another interesting\footnote{\textsc{aka} weird.}\footnote{Yes, there are a lot of footnotes. No, I don't care.} uncertainty visualization from the literature is Haber and Wilkinson's~\cite{haber1982perceptual} \textit{fuzzygram}, i.e. a \textit{fuzzy histogram} (or more generally, a \textit{fuzzy bar chart}). This chart type has what I would call a compelling \textit{generative story}: an explanation you can give for how the uncertainty encoding in the chart arises based on some generative process. Imagine we want to add uncertainty to a bar chart, and we have a distribution for the uncertainty in the value encoded in each bar. Now say we sample a large number of semi-transparent bar charts from these distributions, and overlay them all on top of each other. As the number of charts approaches $\infty$ and the opacity of any given chart goes to 0, the stack of overlapping bars for each value will begin to resemble the complementary \textsc{cdf}, $1 - F(x)$, of that distribution.\footnote{Assuming additive blending and opacities that sum to 1.} That insight leads to the following encoding (with a \textit{pointinterval} overlaid for reference):
 
  \noindent
 \begin{minipage}{.5\columnwidth}
@@ -589,7 +599,25 @@ Another interesting\footnote{\textsc{aka} weird.}\footnote{Yes, there are a lot 
   \end{minipage}
 \hfill\break
 
-I would describe this chart type as theoretically interesting but interpretationally problematic. Anecdotally, without the overlaid reference point and interval, folks I show this plot type to often do not correctly identify the mean of the distribution, believing the darker parts of the bar are more likely (a not unreasonable misinterpretation). On the other hand, I do like the idea of \textit{generative stories} in uncertainty visualization; for example, I've used Plinko boards to depict uncertainty in election forecasts~\textbf{CITE}, which try to capitalize on a physical process---one that might intuitively\footnote{It's an uncertainty vis paper. I had to use ``intuitive'' at least once without definition.} feel random to people---to depict uncertainty through a form of \textit{sedimentation}~\textbf{CITE}.
+I would describe this chart type as theoretically interesting but interpretationally problematic. Anecdotally, without the overlaid reference point and interval, folks I show this to often do not correctly identify the mean of the distribution, believing the darker parts of the bar are more likely (a not unreasonable misinterpretation).\footnote{I don't know if this is an example of within-the-bar bias~\cite{newman2012bar} or not.} On the other hand, I do like the idea of \textit{generative stories} in uncertainty visualization; for example, I've used Plinko boards to depict uncertainty in election forecasts~\textbf{CITE}, which try to capitalize on a physical process---one that might intuitively\footnote{As this is an uncertainty vis paper, I am legally required to use ``intuitive'' at least once without defining it.} feel random to people---to depict uncertainty through a form of \textit{sedimentation}~\textbf{CITE}.
+
+Another advantage to being able to map arbitrary data values onto slab aesthetics is that we can map the results of logical conditions onto those aesthetics. A common procedure in the Bayesian estimation community is to use regions of practical equivalence (\textsc{rope})~\cite{kruschke2018rejecting}. Say, for example, you are interested in whether an estimate is ``practically'' equal to 0; you would define a \textsc{rope} around 0 of $\pm$ some small effect size within which you would consider the value so close to 0 it is effectively indistinguishable from it. Then you can ask questions like, what is the probability the value is practically equivalent to 0? We can visualize this probability by highlighting the \textsc{rope} on a density:
+
+\noindent
+\begin{minipage}{.5\columnwidth}
+
+\begin{align*}
+f_M(x) &\rightarrow \textit{thickness}\\
+\lvert x \rvert < 2 &\rightarrow \textit{fill}\\
+\textsc{stat} &= \mathit{slab}
+\end{align*}
+\end{minipage}%
+  \begin{minipage}{.4\columnwidth}
+    \centering
+    \includegraphics[width=1.2\columnwidth]{figs/3-slab_raindrop.pdf}
+  \end{minipage}
+\hfill\break
+
 
 \section{Discussion}
 
