@@ -88,15 +88,15 @@ ggsave("figs/2-mpg_v_weight.pdf", device = cairo_pdf)
 
 ### Uncertainty as she is spoke
 
-```{r 2-mean_sd_interval, fig.height = 2, fig.width = 2.5}
+```{r 2-mean_sd_interval, fig.height = 1.25, fig.width = 2.5}
 p = data.frame(a = dist_normal(0, 1)) |>
   ggplot(aes(xdist = a)) +
   stat_pointinterval(.width = .95) +
   scale_y_continuous(breaks = NULL) +
   scale_x_continuous(breaks = NULL) +
-  label_(label = "italic(a)", x = 0, y = 0.12, hjust = 0.5, parse = TRUE) +
-  bracket_(x = 0, xend = 1, y = -0.12) +
-  label_(label = "italic(sigma[a])", x = 0.5, y = -0.2, hjust = 0.5, parse = TRUE) +
+  label_(label = "italic(a)", x = 0, y = 0.18, hjust = 0.5, parse = TRUE) +
+  bracket_(x = 0, xend = 1, y = -0.18) +
+  label_(label = "italic(sigma[a])", x = 0.5, y = -0.34, hjust = 0.5, parse = TRUE) +
   labs(y = NULL)
 
 p
