@@ -1,0 +1,73 @@
+---
+title: "Figures for the ggdist paper"
+author: "Matthew Kay"
+date: "2023-03-11"
+output: html_document
+---
+
+## Introduction
+
+This document generates the various figures for the paper, *ggdist: Visualizations of Distributions and Uncertainty in the Grammar of Graphics*.
+
+## Setup
+
+These libraries are needed to build this file:
+
+```{r setup}
+library(ggplot2)
+library(ggdist)              # obviously
+library(distributional)      # for dist_...
+library(dplyr)               # for data manipulation
+library(systemfonts)         # for using system fonts
+```
+
+And this ggplot theme, based on `theme_ggdist()`, using the Source Sans Pro font (in the `fonts/` folder):
+
+```{r}
+theme_set(
+  theme_light(base_family = "Source Sans Pro") + theme(
+    axis.line.x = element_line(color = "gray70", linewidth = rel(0.5)), 
+    axis.line.y = element_line(color = "gray70", linewidth = rel(0.5)),
+    axis.title.x = element_text(margin = margin(t = 7)), 
+    axis.title.y = element_text(margin = margin(r = 7)), 
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(), 
+    panel.border = element_blank(),
+    strip.text = element_text(color = "black", margin = margin(6, 6, 6, 6)),
+    strip.background = element_rect(fill = "gray90")
+  )
+)
+```
+
+
+## Setting the stage
+
+### A simplified notation for the grammar of graphics
+
+We're going to use a slightly modified version of the mtcars dataset:
+
+```{r cars}
+cars = mtcars |>
+  mutate(weight = wt)
+```
+
+We can generate a nice scatterplot of it:
+
+```{r fig.height = 2.5, fig.width = 2.5}
+p = cars |>
+  ggplot(aes(x = weight, y = mpg)) +
+  geom_point()
+p
+
+ggsave("figs/2-mpg_v_weight.pdf", device = cairo_pdf)
+```
+
+
+
+## Session Info
+
+This file was built with the following setup:
+
+```{r session info}
+sessionInfo()
+```
