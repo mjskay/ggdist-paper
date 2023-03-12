@@ -195,11 +195,19 @@ This shows the close correspondence between the abstract notation above and the 
 Speaking of existing implementations of the grammar of graphics, how do they implement uncertainty visualization? Rudimentarily, I would say.
 
 One natural approach to uncertainty visualization is to assume a Gaussian approximation: to represent all estimates and their uncertainty as a mean and standard deviation. This makes the specification problem easy: instead of mapping a single value onto the \textit{x} aesthetic, say, we map a point estimate onto \textit{x} and provide an aesthetic for its standard deviation; call it $x_\textsc{sd}$. Say we had estimated a variable $a$ and had quantified its standard error (i.e. the standard deviation of its sampling distribution) as $\sigma_a$, we might plot a point with an error bar using a \textit{pointinterval} geometry as follows:
+
+\hfill\break
+  \begin{minipage}{.5\columnwidth}
 \begin{align*}
 a &\rightarrow x\\
 \sigma_a &\rightarrow x_\textsc{sd}\\
 \textsc{geom} &= \mathit{pointinterval}
 \end{align*}
+  \end{minipage}%
+  \begin{minipage}{.4\columnwidth}
+    \centering
+    \includegraphics[height=\columnwidth]{figs/2-mean_sd_interval.pdf}
+  \end{minipage}
 
 This is one approach taken by \textit{Vega-lite}: it provides an \texttt{errorbar}\footnote{\texttt{errorbar} is, in my view, a misnomer, as is \texttt{xError}: fundamentally, the mark calculates a Gaussian interval, which might be for a distribution being used to represent error in an estimate, but might not. \textit{Error} is not the generic notion at play; a standard deviation is; and the generic mark is an interval, not an error bar.} mark (analogous to \textit{pointinterval}) and an \texttt{xError}  channel (analogous to $x_\textsc{sd}$). Thus, I'll refer to this notation as the $\{x, x_\textsc{sd}\}$ approach.
 
