@@ -193,7 +193,7 @@ This shows the close correspondence between the abstract notation above and the 
 
 \subsection{Uncertainty visualization in the grammar of graphics, as she is spoke}
 
-Speaking of existing implementations of the grammar of graphics, how do they implement uncertainty visualization? In a limited manner, I would say.
+Speaking of existing implementations of the grammar of graphics, how do they implement uncertainty visualization? Rudimentarily, I would argue.
 
 One natural approach to uncertainty visualization is to assume a Gaussian approximation: to represent all estimates and their uncertainty as a mean and standard deviation. This makes the specification problem easy: instead of mapping a single value onto the \textit{x} aesthetic, say, we map a point estimate onto \textit{x} and provide an aesthetic for its standard deviation; call it $x_\textsc{sd}$. Say we had estimated a variable $a$ and had quantified its standard error (i.e. the standard deviation of its sampling distribution) as $\sigma_a$, we might plot a point with an error bar using a \textit{pointinterval} geometry as follows, yielding a 95\% interval calculated from a Normal distribution with mean $a$ and standard deviation $\sigma_a$:
 
@@ -277,13 +277,15 @@ F_A^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
 \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[width=1.2\columnwidth]{figs/3-geom_pointinterval_quantiles.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/3-stat_pointinterval_linewidth.pdf}
   \end{minipage}
 \hfill\break
 
-This is a not uncommon approach that tries to avoid dichotomous thinking by showing multiple intervals with of different masses. It also has the nice grammar-of-graphics-ish property of mapping the mass ($\gamma$) onto the width of the interval, instead of creating two explicit, separate layers, each specifying a different interval---it makes the mass into \textit{data}.\footnote{I learned at least two useful things from a relational databases class in undergrad: (1) it's always better to put data in rows than in column names of tables---an insight that stems from database \textit{normal forms}~\textbf{CITE} (distinctions between which I have long forgotten) or what some statisticians call \textit{tidy data}~\textbf{CITE}; and (2) you are rarely at Google scale, so you're probably better off with a relational database with proper transactions than some dumb old key value store. The latter lesson my grad students refuse to learn until they build a webapp to collect data from 300 participants using some newfangled database they aren't the target users for, and end up with garbage. Kids these days, etc.} This will make it easy to generalize to other visualizations, e.g. by mapping mass onto \textit{color} instead of \textit{linewidth}.
+This is a not uncommon approach that tries to avoid dichotomous thinking by showing multiple intervals of different masses. It also has the nice grammar-of-graphics-ish property of mapping the mass ($\gamma$) onto the width of the line, instead of creating two explicit, separate layers, each specifying a different interval---it makes the mass into \textit{data}.\footnote{I learned at least two useful things from a relational databases class in undergrad: (1) it's always better to put data into rows than into column names of tables---an insight that stems from database \textit{normal forms}~\textbf{CITE} (distinctions between which I have long forgotten) or what some statisticians call \textit{tidy data}~\textbf{CITE}; and (2) you are rarely at Google scale, so you're probably better off with a relational database with proper transactions than some dumb old key value store. The latter lesson my grad students refuse to learn until they build a webapp to collect data from 300 participants using some newfangled database they aren't the target users for, and end up with garbage. Kids these days, etc.} This also makes it easy to generalize to other visualizations, e.g. by modifying the previous specification to map mass onto \textit{color} instead of \textit{linewidth}:
 
-On the other hand, this is still a bit low-level: it requires the user knows how to calculate interval endpoints from the quantile function. This also limits us specifically to quantile intervals, when other intervals types, such as highest-density intervals~\textbf{CITE} and shortest intervals~\textbf{CITE}, might be preferable. Thus, \textit{ggdist} also supplies a \textit{stat} version of \textit{pointinterval}, which bundles up some statistical calculations and default aesthetic mappings with a \textit{pointinterval} geometry. All \textit{stat}s in \textit{ggdist} support the $x_\textsc{dist}$ and $y_\textsc{dist}$ aesthetics, onto which distribution objects can be mapped. They also allow the user to specify the type of point and interval used, and generate the corresponding values and mappings for $x$, $x_\textsc{min}$, $x_\textsc{max}$, and \textit{linewidth}. This changes the specification to something like:
+\textbf{TODO: example of intervals using color}
+
+On the other hand, this is still a bit low-level: it requires the user to know how to calculate interval endpoints from the quantile function. This also limits us specifically to quantile intervals, when other intervals types, such as highest-density intervals~\textbf{CITE} and shortest intervals~\textbf{CITE}, might be preferable. Thus, \textit{ggdist} also supplies a \textit{stat} version of \textit{pointinterval}, which bundles up some statistical calculations and default aesthetic mappings with a \textit{pointinterval} geometry. All \textit{stat}s in \textit{ggdist} support the $x_\textsc{dist}$ and $y_\textsc{dist}$ aesthetics, onto which distribution objects can be mapped. They also allow the user to specify the type of point and interval used, and generate the corresponding values and mappings for $x$, $x_\textsc{min}$, $x_\textsc{max}$, and \textit{linewidth}. This changes the specification to something like:
 
 
 \begin{align*}
@@ -307,7 +309,7 @@ In implementation, \textit{ggdist} allows distributions to be represented by num
 \gamma &\in \{0.66, 0.95\}
 \end{align*}
 
-In \textit{ggdist}, using \texttt{distributional::dist\_normal}, this is:
+In \textit{ggdist}, using \texttt{distributional::dist\_normal}, the specification is quite similar:
 
 \begin{centerverbatim}
 ggplot(data) +
@@ -318,7 +320,7 @@ ggplot(data) +
   )
 \end{centerverbatim}
 
-These happen to be the default values for \texttt{point\_interval} and \texttt{.width} ($\gamma$\footnote{For historical reasons that have to do with a combination of a very long discussion with a bunch of people on the Stan forums~\textbf{CITE} and naming conventions in some R \textsc{api}s for fixed arguments to functions with variable argument lists~\textbf{CITE}, $\gamma$ in \textit{ggdist} is spelled \texttt{.width}. Reflecting on my past mistakes, a better name would be  \texttt{mass}.}), so just \texttt{stat\_pointinterval()}  also works here. To demonstrate generalizing this approach, consider the very common need of placing uncertainty intervals on the results of a $t$-test, which can be derived from a $t_\nu(\mu, \sigma)$  distribution with $\nu$ degrees of freedom, scale $\mu$ (e.g. an estimated mean), and scale $\sigma$ (e.g. a standard error). Given these three numbers in a data frame, a visualization specification might be:
+These happen to be the default values for \texttt{point\_interval} and \texttt{.width} ($\gamma$),\footnote{For historical reasons that have to do with a combination of a very long discussion with a bunch of people on the Stan forums~\textbf{CITE} and naming conventions in some R \textsc{api}s for fixed arguments to functions with variable argument lists~\textbf{CITE}, $\gamma$ in \textit{ggdist} is spelled \texttt{.width}. Reflecting on my past mistakes, a better name would be  \texttt{mass}.} so just \texttt{stat\_pointinterval()}  also works here. To demonstrate generalizing this approach, consider the very common need of placing uncertainty intervals on the results of a $t$-test, which can be derived from a $t_\nu(\mu, \sigma)$  distribution with $\nu$ degrees of freedom, scale $\mu$ (e.g. an estimated mean), and scale $\sigma$ (e.g. a standard error). Given these three numbers in a data frame, a visualization specification might be:
 
 
 \begin{align*}
@@ -335,7 +337,7 @@ ggplot(data) +
 
 \subsection{Ribbons}
 
-Once we have interval representations, it is straightforward to develop uncertainty band representations. Imagine a regression that models car miles per gallon based on weight (the details of the function $g$ are not important):
+Once we have \textit{pointinterval} representations, it is straightforward to develop uncertainty band representations by generalizing points to lines and intervals to ribbons---thus, \textit{lineribbon}. Imagine a regression that models car miles per gallon based on weight (the details of the function $g$ are not important):
 
 \[
 \log(\mathit{mpg}) \sim \operatorname{Normal}\left(g(\mathit{weight}), \sigma\right)
@@ -349,7 +351,7 @@ p(\mathit{mpg} \mid \mathit{weight}) &\rightarrow y_\textsc{dist}\\
 \textsc{stat} &= \mathit{lineribbon}\\
 \gamma &\in \{0.50, 0.80, 0.95\}
 \end{align*}
-Assuming \texttt{m}  is a Bayesian version of such a model fit using the \textit{brms} or \textit{rstanarm} modeling packages in R, and \texttt{preds} is a data frame of desired \textit{weight} values to predict on, we can add a column to \texttt{preds} that contains a random variable representation of $p(\mathit{mpg} \mid \mathit{weight})$ using \texttt{brms::posterior\_predict} and the \texttt{posterior::rvar}  data type. The latter is a data type I created\footnote{This was a slightly insane idea in itself, given the way that base R data types work. As R's classes work based on generic \textit{functions}, rather than classes with a well-defined set of methods, this requires tracking down all the various functions implemented to work with arrays and vectors in the language and providing implementations for them for random variable arrays. Indexing functions especially are annoying, as there are half a dozen different ways to index into R arrays, each with their own corner cases (especially when missing data is involved!). Anyway.} specifically to wrap large samples that represent distributions into objects that mimic R vectors and arrays, and which can be added to data frames:
+Assuming \texttt{m}  is a Bayesian version of such a model fit using the \textit{brms} or \textit{rstanarm} modeling packages in R, and \texttt{preds} is a data frame of desired \textit{weight} values to predict on, we can add a column to \texttt{preds} that contains a random variable representation of $p(\mathit{mpg} \mid \mathit{weight})$ using \texttt{brms::posterior\_predict}~\textbf{CITE} and the \texttt{posterior::rvar}  data type~\textbf{CITE}. The latter is a data type I created\footnote{This was a slightly insane idea in itself, given the way that base R data types work. As R's classes work based on generic \textit{functions}, rather than classes with a well-defined set of methods, this requires tracking down all the various functions implemented to work with arrays and vectors in the language and providing implementations for them for random variable arrays. Indexing functions especially are annoying, as there are half a dozen different ways to index into R arrays, each with myriad corner cases. Anyway.} specifically to wrap large samples that represent distributions into objects that mimic R vectors and arrays, and which can be added to data frames:
 
 \begin{centerverbatim}
 preds = preds |> mutate(
@@ -357,17 +359,16 @@ preds = preds |> mutate(
 )
 \end{centerverbatim}
 
-Given this data frame, we can plot it as follows (adding a \textit{point} layer to show the original data too):
+Given this data frame, we the equivalent of the abstract specification above is as follows (adding a \textit{point} layer to show the original data too):
 
 \begin{centerverbatim}
 ggplot(preds) +
   aes(x = weight) +
   stat_lineribbon(aes(ydist = mpg_given_weight)) +
-  geom_point(aes(y = mpg), data = cars) +
-  scale_fill_brewer()
+  geom_point(aes(y = mpg), data = cars)
 \end{centerverbatim}
 
-\textit{lineribbon} defaults to \texttt{.width = c(.5, .8, .95)} and maps the resulting \texttt{.width} onto the \texttt{fill} aesthetic, so we do not need to specify the \texttt{fill} mapping (though we can override this default). \texttt{scale\_fill\_brewer} is not necessary, but swaps in a nicer (in this context) ColorBrewer Blues~\textbf{CITE} palette in place of the default Viridis palette~\textbf{CITE}.
+\textit{lineribbon} defaults to \texttt{.width = c(.5, .8, .95)} and maps the resulting \texttt{.width} onto the \texttt{fill} aesthetic, so we do not need to specify \texttt{.width} or the \texttt{fill} mapping for this example.
 
 Once we have a multiple-ribbon geometry, it becomes easy to create other uncertainty visualization types, like gradient fan charts~\textbf{CITE}. For example, we could use a large number of intervals, say $k = 50$ or $100$, and generate $k$  evenly-spaced interval widths between 0 and 1 (not including 0 or 1): $\gamma = \{(1 - 0.5)/k, \dots, (k - 0.5)/k\}$. This is the \texttt{ppoints(k)} function in R, so we can simply write \texttt{stat\_lineribbon(.width = ppoints(100))} to get a gradient fan chart with 100 intervals. This steams directly from my choice to make $\gamma$ into data, and is one example of support for a chart type that was a happy accident of \textit{ggdist}'s design.
 
