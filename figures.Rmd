@@ -21,6 +21,7 @@ library(dplyr)               # for data manipulation
 library(systemfonts)         # for using system fonts
 library(brms)
 library(posterior)           # rvar
+library(colorspace)          # continuous color palettes
 ```
 
 And this ggplot theme, based on `theme_ggdist()`, using the Source Sans Pro font (in the `fonts/` folder):
@@ -69,6 +70,13 @@ label_ = function(..., hjust = 0, color = label_color) {
     ...
   )
 }
+```
+
+And color palettes:
+
+```{r}
+# sequential version of COlorBrewer Blues that ends in white
+sequential_hcl(n = 7, h = 245, c = c(50, 75, NA), l = c(20, 100), power = 0.8, register = "Blue-White")
 ```
 
 
@@ -242,7 +250,7 @@ preds
 
 Now the vis:
 
-```{r 3-lineribbon_mpg, fig.width = 2.5, fig.height = 2.5}
+```{r 3-lineribbon, fig.width = 2.5, fig.height = 2}
 p = preds |>
   ggplot(aes(x = weight)) +
   stat_lineribbon(aes(ydist = mpg_given_weight), linewidth = 0.75) +
@@ -252,6 +260,20 @@ p = preds |>
 
 p
 ggsave("figs/3-lineribbon.pdf", device = cairo_pdf)
+```
+
+lineribbon fan:
+
+```{r 3-lineribbon_fan, fig.width = 2.5, fig.height = 2}
+p = preds |>
+  ggplot(aes(x = weight)) +
+  stat_lineribbon(aes(ydist = mpg_given_weight, fill = after_stat(.width)), linewidth = 0.75, .width = ppoints(100)) +
+  geom_point(aes(y = mpg), data = cars, color = alpha("black", 0.75), stroke = 0.5, shape = 21, fill = alpha("gray85", 0.5)) +
+  colorspace::scale_fill_continuous_sequential(palette = "Blue-White", rev = FALSE) +
+  guides(fill = "none")
+
+p
+ggsave("figs/3-lineribbon_fan.pdf", device = cairo_pdf)
 ```
 
 
