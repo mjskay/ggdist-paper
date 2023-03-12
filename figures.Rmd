@@ -97,10 +97,7 @@ p = data.frame(a = dist_normal(0, 1)) |>
   label_(label = "italic(a)", x = 0, y = 0.12, hjust = 0.5, parse = TRUE) +
   bracket_(x = 0, xend = 1, y = -0.12) +
   label_(label = "italic(sigma[a])", x = 0.5, y = -0.2, hjust = 0.5, parse = TRUE) +
-  labs(
-    y = NULL,
-    x = NULL
-  )
+  labs(y = NULL)
 
 p
 ggsave("figs/2-mean_sd_interval.pdf", device = cairo_pdf)
