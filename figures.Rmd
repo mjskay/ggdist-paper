@@ -39,6 +39,30 @@ theme_set(
 )
 ```
 
+And some functions we'll use for annotating stuff:
+
+```{r}
+red_ = "#d95f02"
+label_color = red_
+
+bracket_ = function(..., x, xend = x, y, yend = y, color = label_color) {
+  annotate("segment",
+    arrow = arrow(angle = 90, ends = "both", length = unit(3, "points")),
+    color = color, linewidth = 0.75,
+    x = x, xend = xend, y = y, yend = yend,
+    ...
+  )
+}
+label_ = function(..., hjust = 0, color = label_color) {
+  annotate("text",
+    color = color, hjust = hjust, lineheight = 1,
+    size = 3.75,
+    ...
+  )
+}
+```
+
+
 
 ## Setting the stage
 
@@ -53,13 +77,33 @@ cars = mtcars |>
 
 We can generate a nice scatterplot of it:
 
-```{r fig.height = 2, fig.width = 2.5}
+```{r 2-mpg_v_weight, fig.height = 2, fig.width = 2.5}
 p = cars |>
   ggplot(aes(x = weight, y = mpg)) +
   geom_point()
 p
 
 ggsave("figs/2-mpg_v_weight.pdf", device = cairo_pdf)
+```
+
+### Uncertainty as she is spoke
+
+```{r 2-mean_sd_interval, fig.height = 2, fig.width = 2.5}
+p = data.frame(a = dist_normal(0, 1)) |>
+  ggplot(aes(xdist = a)) +
+  stat_pointinterval(.width = .95) +
+  scale_y_continuous(breaks = NULL) +
+  scale_x_continuous(breaks = NULL) +
+  label_(label = "italic(a)", x = 0, y = 0.12, hjust = 0.5, parse = TRUE) +
+  bracket_(x = 0, xend = 1, y = -0.12) +
+  label_(label = "italic(sigma[a])", x = 0.5, y = -0.2, hjust = 0.5, parse = TRUE) +
+  labs(
+    y = NULL,
+    x = NULL
+  )
+
+p
+ggsave("figs/2-mean_sd_interval.pdf", device = cairo_pdf)
 ```
 
 
