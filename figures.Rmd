@@ -53,7 +53,7 @@ cars = mtcars |>
 
 We can generate a nice scatterplot of it:
 
-```{r fig.height = 2.5, fig.width = 2.5}
+```{r fig.height = 2, fig.width = 2.5}
 p = cars |>
   ggplot(aes(x = weight, y = mpg)) +
   geom_point()
