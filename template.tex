@@ -394,12 +394,12 @@ p(\mathit{mpg} \mid \mathit{weight}) &\rightarrow y_\textsc{dist}\\
 \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[width=1.2\columnwidth]{figs/3-stat_pointinterval_student_t.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/3-lineribbon.pdf}
   \end{minipage}
 \hfill\break
 
 
-Assuming \texttt{m}  is a Bayesian version of such a model fit using the \textit{brms} or \textit{rstanarm} modeling packages in R, and \texttt{preds} is a data frame of desired \textit{weight} values to predict on, we can add a column to \texttt{preds} that contains a random variable representation of $p(\mathit{mpg} \mid \mathit{weight})$ using \texttt{brms::posterior\_predict}~\textbf{CITE} and the \texttt{posterior::rvar}  data type~\textbf{CITE}. The latter is a data type I created\footnote{This was a slightly insane idea in itself, given the way that base R data types work. As R's classes work based on generic \textit{functions}, rather than classes with a well-defined set of methods, this requires tracking down all the various functions implemented to work with arrays and vectors in the language and providing implementations for them for random variable arrays. Indexing functions especially are annoying, as there are half a dozen different ways to index into R arrays, each with myriad corner cases. Anyway.} specifically to wrap large samples that represent distributions into objects that mimic R vectors and arrays, and which can be added to data frames:
+I include the raw data as a separate \textit{point} geometry layer as well, for comparison. Assuming \texttt{m}  is a Bayesian version of such a model fit using the \textit{brms} modeling package in R, and \texttt{preds} is a data frame of desired \textit{weight} values to predict on, we can add a column to \texttt{preds} that contains a random variable representation of $p(\mathit{mpg} \mid \mathit{weight})$ using \texttt{brms::posterior\_predict}~\textbf{CITE} and the \texttt{posterior::rvar}  data type~\textbf{CITE}. The latter is a data type I created\footnote{This was a slightly insane idea in itself, given the way that base R data types work. As R's classes work based on generic \textit{functions}, rather than classes with a well-defined set of methods, this requires tracking down all the various functions implemented to work with arrays and vectors in the language and providing implementations for them for random variable arrays. Indexing functions especially are annoying, as there are half a dozen different ways to index into R arrays, each with myriad corner cases. Anyway.} specifically to wrap large samples that represent distributions into objects that mimic R vectors and arrays, and which can be added to data frames:
 
 \begin{centerverbatim}
 preds = preds |> mutate(
@@ -407,18 +407,17 @@ preds = preds |> mutate(
 )
 \end{centerverbatim}
 
-Given this data frame, we the equivalent of the abstract specification above is as follows (adding a \textit{point} layer to show the original data too):
+Given this data frame, we the equivalent of the abstract specification above is:
 
 \begin{centerverbatim}
 ggplot(preds) +
-  aes(x = weight) +
-  stat_lineribbon(aes(ydist = mpg_given_weight)) +
-  geom_point(aes(y = mpg), data = cars)
+  aes(x = weight, ydist = mpg_given_weight) +
+  stat_lineribbon()
 \end{centerverbatim}
 
-\textit{lineribbon} defaults to \texttt{.width = c(.5, .8, .95)} and maps the resulting \texttt{.width} onto the \texttt{fill} aesthetic, so we do not need to specify \texttt{.width} or the \texttt{fill} mapping for this example.
+\texttt{stat\_lineribbon} defaults to \texttt{.width = c(.5, .8, .95)} and maps the resulting \texttt{.width} onto the \texttt{fill} aesthetic, so we do not need to specify \texttt{.width} or the \texttt{fill} mapping for this example.
 
-Once we have a multiple-ribbon geometry, it becomes easy to create other uncertainty visualization types, like gradient fan charts~\textbf{CITE}. For example, we could use a large number of intervals, say $k = 50$ or $100$, and generate $k$  evenly-spaced interval widths between 0 and 1 (not including 0 or 1): $\gamma = \{(1 - 0.5)/k, \dots, (k - 0.5)/k\}$. This is the \texttt{ppoints(k)} function in R, so we can simply write \texttt{stat\_lineribbon(.width = ppoints(100))} to get a gradient fan chart with 100 intervals. This steams directly from my choice to make $\gamma$ into data, and is one example of support for a chart type that was a happy accident of \textit{ggdist}'s design.
+Once we have a multiple-ribbon geometry, it is easy to create other uncertainty visualization types, like gradient fan charts~\textbf{CITE}. For example, we could use a large number of intervals, say $k = 50$ or $100$, and generate $k$  evenly-spaced interval widths between 0 and 1 (not including 0 or 1): $\gamma = \{(1 - 0.5)/k, \dots, (k - 0.5)/k\}$. This is the \texttt{ppoints(k)} function in R, so we can simply write \texttt{stat\_lineribbon(.width = ppoints(100))} to get a gradient fan chart with 100 intervals. This steams directly from my choice to make $\gamma$ into data, and is one example of support for a chart type that was a happy accident of \textit{ggdist}'s design.
 
  
 \section{Hyperlinks and Cross References}
