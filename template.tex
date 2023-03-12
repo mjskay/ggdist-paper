@@ -248,12 +248,19 @@ For either representation, we may also be interested in other functions of the d
 
 For example, a median and $\gamma\%$ quantile interval could be defined generically on any distribution $A$ as follows:
 
+\begin{minipage}{.5\columnwidth}
 \begin{align*}
 \operatorname{median}(A) &\rightarrow x\\
 F_A^{-1}\left(\frac{1 - \gamma}{2}\right) &\rightarrow x_\textsc{min}\\
 F_A^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
 \textsc{geom} &= \mathit{pointinterval}
 \end{align*}
+\end{minipage}%
+  \begin{minipage}{.4\columnwidth}
+    \centering
+    \includegraphics[width=1.2\columnwidth]{figs/3-geom_pointinterval_quantiles.pdf}
+  \end{minipage}
+\hfill\break
 
 If $A$ is a probability distribution, this is a Bayesian \textit{credible }interval, and if $A$ is a confidence distribution, this is a frequentist $confidence$ interval. This lets us abstract over the petty battles between this or that statistical camp and get to the meaningful business of visualizing uncertainty. This also allows us something not present in other attempts so far: to make it easy to specific multiple interval sizes, and to map interval size itself onto an aesthetic. For example, if we wanted to show two intervals, a 95\% and a 66\%, where the smaller interval is shown as a thicker line, we could write:
 
