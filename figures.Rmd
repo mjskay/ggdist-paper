@@ -390,7 +390,7 @@ p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab(aes(alpha = !!Pr_(X > x)), thickness = 1, side = "both", fill_type = "gradient", scale = 0.7) +
   stat_pointinterval() +
-  scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
+  scale_x_continuous(breaks = NULL, limits = c(-3, 14), expand = expansion(0)) +
   scale_y_discrete(expand = expansion(0.15)) +
   scale_alpha_continuous(range = c(0, 1), guide = "none") +
   labs(x = NULL)
