@@ -631,7 +631,7 @@ The preceding sections attempt to give a taste for why \textit{ggdist} is struct
 
 
 
-\subsection{Uncertainty is difficult to factor out into data pre-processing steps}
+\subsection{Uncertainty is difficult to factor out into data pre-processing}
 \label{sec:jacobians}
 
 As an earlier footnote alluded,\textsuperscript{\ref{foot:jacobians}}   we must be very careful when visualizing density functions. A na\"{i}ve implementation of \texttt{stat\_slab} might simply pass $x$ values through the density function of the distribution mapped to $x_\textsc{dist}$. However, if a non-linear scale transformation is applied, this will result in incorrect densities. This is because, for a random variable $Y = g(X)$, the density function $f_Y$ is:
@@ -658,12 +658,12 @@ ggplot() +
 \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[width=1.2\columnwidth]{figs/3-slab_fuzzygram.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/3-jacobian-lognorm.pdf}
   \end{minipage}
 \hfill\break
 
 
-If we plot this on a log scale, we should hope to see Gaussian density with a median of $10^0 = 1$ (since medians are preserved under transformation). However, because \textit{ggplot2} has no way to know this function is a density (nor does it necessarily know the derivative of the scale function), the resulting density will be incorrect:
+If we plot this on a log scale, we should hope to see a Gaussian density with a median of $10^0 = 1$ (since medians are preserved under transformation). However, because \textit{ggplot2} has no way to know this function is a density (nor does it necessarily know the derivative of the scale function), the resulting density will be incorrect:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
@@ -678,14 +678,11 @@ ggplot() +
 \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[width=1.2\columnwidth]{figs/3-slab_fuzzygram.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/3-jacobian-incorrect.pdf}
   \end{minipage}
 \hfill\break
 
-Clearly the median does not divide the area into two regions with equal mass, as it should. I have no doubt this has lead to user errors in \textit{ggplot2}.\footnote{For example, issue \href{https://github.com/tidyverse/ggplot2/issues/4783}{#4783} in the \textit{ggplot2} repository asks why a theoretical density and samples from a distribution do not line up under transformation---a less attentive user might never have noticed.}. Fortunately, \textit{ggdist} does know about Jacobian adjustments. It uses a combination of symbolic and (when necessary) numeric differentiation to calculate derivatives of \textit{ggplot2} scale transformations to adjust densities.\footnote{Specifically, \textit{ggdist} applies the built-in \texttt{D} function to get the symbolic derivative of the expression defining the scale function and, if that fails, falls back to \texttt{numDeriv::jacobian}~\textbf{CITE}. In the future, if my pull request \href{https://github.com/r-lib/scales/pull/341}{#341} to the \textit{scales} package is accepted, \textit{ggdist} will be able to use automatic differentiation instead, which is more reliable.} As a result, we can visualize a log-transformed log-Normal density and get the correct result:
-
-
-If we plot this on a log scale, we should hope to see Gaussian density with a median of $10^0 = 1$ (since medians are preserved under transformation). However, because \textit{ggplot2} has no way to know this function is a density (nor does it necessarily know the derivative of the scale function), the resulting density will be incorrect:
+Clearly the median does not divide the area into two regions with equal mass, as it should. I have no doubt this has lead to user errors in \textit{ggplot2}.\footnote{For example, issue \href{https://github.com/tidyverse/ggplot2/issues/4783}{\#4783} in the \textit{ggplot2} repository asks why a theoretical density and samples from a distribution do not line up under transformation---a less attentive user might never have noticed.} Fortunately, \textit{ggdist} does know how to correctly transform densities. It uses a combination of symbolic and (when necessary) numeric differentiation to calculate derivatives of \textit{ggplot2} scale transformations to adjust densities.\footnote{Specifically, \textit{ggdist} applies the built-in \texttt{D} function to get the symbolic derivative of the expression defining the scale function and, if that fails, falls back to \texttt{numDeriv::jacobian}~\textbf{CITE}. In the future, if my pull request \href{https://github.com/r-lib/scales/pull/341}{\#341} to the \textit{scales} package is accepted, \textit{ggdist} will be able to use automatic differentiation instead, which is more reliable.} As a result, we can visualize a log-transformed log-Normal density and get the correct result:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
@@ -699,11 +696,11 @@ ggplot() +
 \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[width=1.2\columnwidth]{figs/3-slab_fuzzygram.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/3-jacobian-correct.pdf}
   \end{minipage}
 \hfill\break
 
-This emphasizes the need for uncertainty visualization systems to be \textit{scale-aware}: it is not possible to correctly implement uncertainty visualization purely as a data pre-processing step.
+This emphasizes the need for uncertainty visualization systems to be \textit{scale-aware}: it is not possible to comprehensively implement uncertainty visualization purely as a data pre-processing step.
 
 \section{Discussion}
 
@@ -717,31 +714,19 @@ This emphasizes the need for uncertainty visualization systems to be \textit{sca
 \section*{Supplemental Materials}
 \label{sec:supplemental_materials}
 
-Refer to the instructions for this section (\cref{sec:supplement_inst}).
-Below is an example you can follow that includes the actual supplemental material for this template:
+All supplemental materials are available on Zenodo at \textbf{TODO} and on GitHub at \href{https://github.com/mjskay/ggdist-paper}{github.com/mjskay/ggdist-paper}, released under a CC BY 4.0 license.
+Materials include (1) an RMarkdown file that generates the figures in the paper; (2) generated figure images; and (3) the full source of this paper.
 
-All supplemental materials are available on OSF at \url{https://doi.org/10.17605/OSF.IO/2NBSG}, released under a CC BY 4.0 license.
-In particular, they include (1) Excel files containing the data for and analyses for creating \cref{tab:vis_papers} and \cref{fig:vis_papers}, (2) figure images in multiple formats, and (3) a full version of this paper with all appendices.
-Our other code is intellectual property of a corporation---Starbucks Research---and there is no feasible way to share it publicly.
-
+The full source of \textit{ggdist} itself is available on Zenodo at \href{https://doi.org/10.5281/zenodo.3879620}{doi:10.5281/zenodo.3879620} and on GitHub at \href{https://github.com/mjskay/ggdist}{github.com/mjskay/ggdist}, released under a GPL 3.0 license.
 
 \section*{Figure Credits}
 \label{sec:figure_credits}
 
-Refer to the instructions for this section (\cref{sec:figure_credits_inst}).
-Here are the actual figure credits for this template:
-
-\Cref{fig:teaser} image credit: Scott Miller / Special to the Vancouver Sun, January 22, 2009, page A6.
-
-\Cref{fig:vis_papers} is a partial recreation of Fig.\ 1 from \cite{Isenberg:2017:VMC}, which is in the public domain.
-
+All figures were created by Matthew Kay.
 
 %% if specified like this the section will be ommitted in review mode
 \acknowledgments{%
-  \textbf{For IEEE VIS}, this section may be included in the \textbf{2-page allotment for References, Figure Credits, and Acknowledgments}.
-	
-	The authors wish to thank A, B, and C.
-  This work was supported in part by a grant from XYZ (\# 12345-67890).%
+I would like to thank various folks who have used, given feedback on, or contributed to \textit{ggdist} over the years (this list is neither exhaustive nor in any particular order): Xiaoying Pu, Alex Kale, Abhraneel Sarma, Fumeng Yang, Matti Vuorre, Dominique Makowski, TJ Mahr, Tim Mastny, Aki Vehtari, Brenton M. Wiernik, Arthur Albuquerque, A. Solomon Kurz, Gabe Bassett, Mitchell O'Hara-Wild, Steve Haroz, Jarrett Byrnes, Dylan H. Morris, Dmytro Perepolkin, C\'edric Scherer,  Isabella Ghement, and Teun van den Brand. This work was supported in part by NSF award IIS-1910431.%
 }
 
 
@@ -758,22 +743,6 @@ Here are the actual figure credits for this template:
 
 \appendix % You can use the `hideappendix` class option to skip everything after \appendix
 
-\section{About Appendices}
-Refer to \cref{sec:appendices_inst} for instructions regarding appendices.
-
-\section{Troubleshooting}
-\label{appendix:troubleshooting}
-
-\subsection{ifpdf error}
-
-If you receive compilation errors along the lines of \texttt{Package ifpdf Error: Name clash, \textbackslash ifpdf is already defined} then please add a new line \verb|\let\ifpdf\relax| right after the \verb|\documentclass[journal]{vgtc}| call.
-Note that your error is due to packages you use that define \verb|\ifpdf| which is obsolete (the result is that \verb|\ifpdf| is defined twice); these packages should be changed to use \verb|ifpdf| package instead.
-
-
-\subsection{\texttt{pdfendlink} error}
-
-Occasionally (for some \LaTeX\ distributions) this hyper-linked bib\TeX\ style may lead to \textbf{compilation errors} (\texttt{pdfendlink ended up in different nesting level ...}) if a reference entry is broken across two pages (due to a bug in \verb|hyperref|).
-In this case, make sure you have the latest version of the \verb|hyperref| package (i.e.\ update your \LaTeX\ installation/packages) or, alternatively, revert back to \verb|\bibliographystyle{abbrv-doi}| (at the expense of removing hyperlinks from the bibliography) and try \verb|\bibliographystyle{abbrv-doi-hyperref}| again after some more editing.
 
 \end{document}
 
