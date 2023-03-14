@@ -291,14 +291,6 @@ two_a = data.frame(
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab() +
-  # stat_spike(
-  #   at = c(1, 1.8, 2.6, 3.4, 4.2),
-  #   data = \(d) filter(d, group == 2),
-  #   size = NA,
-  #   arrow = arrow(angle = 90, length = unit(3, "pt")),
-  #   color = label_color,
-  #   linewidth = 0.75
-  # ) +
   bracket_(x = 14, y = 2, yend = 2.9) +
   bracket_(x = 14, y = 1, yend = 1.9) +
   label_(x = 13.5, y = 2.5, label = "thickness", fontface = "italic", hjust = 1, vjust = 0.9) +
@@ -376,7 +368,7 @@ Raindrop plots:
 ```{r slab_raindrop, fig.width = 2.5, fig.height = 1.5}
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
-  stat_eye(aes(thickness = after_stat(ifelse(.width <= .95, log(pdf), NA))), normalize = "groups", .width = .95) +
+  stat_eye(aes(thickness = ifelse(.width <= .95, log(!!p_(x)), NA)), normalize = "groups", .width = .95) +
   scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
   scale_y_discrete(expand = expansion(0.15)) +
   guides(alpha = "none") +
@@ -405,14 +397,14 @@ ggsave("figs/3-slab_fuzzygram.pdf", device = cairo_pdf)
 Regions of practical equivalence:
 
 ```{r slab_rope, fig.width = 2.5, fig.height = 2}
-two_a = data.frame(
+two_a_zero = data.frame(
   nu = c(5, 60),
   mu = c(5, 0),
   sigma = c(1.3, 1.1),
   group = factor(c("a", "b"))
 )
 
-p = two_a |>
+p = two_a_zero |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab(aes(fill = after_stat(abs(x) < 2))) +
   scale_x_continuous(breaks = seq(-2, 14, by = 2)) +
