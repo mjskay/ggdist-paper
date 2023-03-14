@@ -50,25 +50,27 @@ red_ = "#d95f02"
 blue_ = "#6BAED6"
 label_color = red_
 
-bracket_ = function(..., x, xend = x, y, yend = y, color = label_color) {
+bracket_ = function(..., x, xend = x, y, yend = y, color = label_color, linewidth = 0.5) {
   annotate("segment",
     arrow = arrow(angle = 90, ends = "both", length = unit(3, "points")),
-    color = color, linewidth = 0.75,
+    color = color, linewidth = linewidth,
     x = x, xend = xend, y = y, yend = yend,
     ...
   )
 }
-arrow_ = function(..., curvature = 0, x, xend = x, y, yend = y, color = label_color) {
+arrow_ = function(..., curvature = 0, x, xend = x, y, yend = y, color = label_color, linewidth = 0.5) {
   annotate("curve", 
     color = color, arrow = arrow(angle = 45, length = unit(3, "points"), type = "closed"),
-    curvature = curvature,
+    curvature = curvature, linewidth = linewidth,
+    lineend = "square", linejoin = "mitre",
     x = x, xend = xend, y = y, yend = yend
   )
 }
-label_ = function(..., hjust = 0, color = label_color) {
+label_ = function(..., hjust = 0, color = label_color, family = "serif") {
   annotate("text",
     color = color, hjust = hjust, lineheight = 1,
     size = 3.75,
+    family = family,
     ...
   )
 }
@@ -113,9 +115,9 @@ p = data.frame(a = dist_normal(0, 1)) |>
   stat_pointinterval(.width = .95) +
   scale_y_continuous(breaks = NULL) +
   scale_x_continuous(breaks = NULL, limits = c(-2.95, 2.95)) +
-  label_(label = "italic(a)", x = 0, y = 0.19, hjust = 0.5, parse = TRUE) +
+  label_(label = "italic(mu)", x = 0, y = 0.19, hjust = 0.5, parse = TRUE) +
   bracket_(x = 0, xend = 1, y = -0.18) +
-  label_(label = "italic(sigma[a])", x = 0.5, y = -0.34, hjust = 0.5, parse = TRUE) +
+  label_(label = "italic(sigma)", x = 0.5, y = -0.34, hjust = 0.5, parse = TRUE) +
   labs(y = NULL, x = NULL)
 
 p
@@ -128,11 +130,11 @@ p = data.frame(a = dist_normal(0, 1)) |>
   stat_pointinterval(.width = .95, justification = 0.55) +
   scale_y_continuous(breaks = NULL) +
   scale_x_continuous(breaks = NULL, limits = c(-2.95, 2.95)) +
-  label_(label = "italic(a)", x = 0, y = 0.17, hjust = 0.5, parse = TRUE) +
+  label_(label = "italic(mu)", x = 0, y = 0.17, hjust = 0.5, parse = TRUE) +
   arrow_(x = -1.96, y = -0.2, yend = -0.06) +
-  label_(label = "italic(a - 1.96%.%sigma[a])", x = -1.96, y = -0.32, hjust = 0.5, parse = TRUE) +
+  label_(label = "italic(mu - 1.96%.%sigma)", x = -1.96, y = -0.32, hjust = 0.5, parse = TRUE) +
   arrow_(x = 1.96, y = -0.2, yend = -0.06) +
-  label_(label = "italic(a + 1.96%.%sigma[a])", x = 1.96, y = -0.32, hjust = 0.5, parse = TRUE) +
+  label_(label = "italic(mu + 1.96%.%sigma)", x = 1.96, y = -0.32, hjust = 0.5, parse = TRUE) +
   labs(y = NULL, x= NULL) 
 
 p
@@ -149,11 +151,11 @@ p = data.frame(a = dist_normal(0, 1)) |>
   stat_pointinterval(.width = .95, justification = 0.65) +
   scale_y_continuous(breaks = NULL) +
   scale_x_continuous(breaks = NULL, limits = c(-2.95, 2.95)) +
-  label_(label = "median(italic(A))", x = 0, y = 0.15, hjust = 0.5, parse = TRUE) +
+  label_(label = "median(italic(M))", x = 0, y = 0.15, hjust = 0.5, parse = TRUE) +
   arrow_(x = -1.96, y = -0.2, yend = -0.04) +
-  label_(label = "{italic(F)[italic(A)]^{-1}}~bgroup('(', over(1 - gamma, 2), ')')", x = -1.96, y = -0.42, hjust = 0.5, parse = TRUE) +
+  label_(label = "{italic(F)[italic(M)]^{-1}}~bgroup('[', over(1 - gamma, 2), ']')", x = -1.96, y = -0.42, hjust = 0.5, parse = TRUE) +
   arrow_(x = 1.96, y = -0.2, yend = -0.04) +
-  label_(label = "{italic(F)[italic(A)]^{-1}}~bgroup('(', over(1 + gamma, 2), ')')", x = 1.96, y = -0.42, hjust = 0.5, parse = TRUE) +
+  label_(label = "{italic(F)[italic(M)]^{-1}}~bgroup('[', over(1 + gamma, 2), ']')", x = 1.96, y = -0.42, hjust = 0.5, parse = TRUE) +
   labs(y = NULL, x = NULL)
 
 p
@@ -196,7 +198,7 @@ p = data.frame(a = dist_normal(0, 1)) |>
   stat_pointinterval() +
   scale_y_continuous(breaks = NULL) +
   scale_x_continuous(breaks = NULL, limits = c(-2.5, 2.5)) +
-  label_(label = "A", x = 0, y = 0.15, hjust = 0.5, vjust = 1) +
+  label_(label = "italic(M)", x = 0, y = 0.15, hjust = 0.5, vjust = 1, parse = TRUE) +
   labs(y = NULL, x = NULL)
 
 p
@@ -209,7 +211,7 @@ p = data.frame(a = dist_normal(0, 1)) |>
   stat_pointinterval() +
   scale_y_continuous(breaks = NULL) +
   scale_x_continuous(breaks = NULL, limits = c(-2.5, 2.5)) +
-  label_(label = "Normal(italic(a), italic(sigma[a]))", x = 0, y = 0.15, hjust = 0.5, vjust = 1, parse = TRUE) +
+  label_(label = "Normal(italic(mu), italic(sigma))", x = 0, y = 0.15, hjust = 0.5, vjust = 1, parse = TRUE) +
   labs(y = NULL, x = NULL)
 
 p
@@ -222,7 +224,7 @@ p = data.frame(a = dist_student_t(6, 0, 1)) |>
   stat_pointinterval() +
   scale_y_continuous(breaks = NULL) +
   scale_x_continuous(breaks = NULL, limits = c(-2.5, 2.5)) +
-  label_(label = "italic(t[nu[a]])(italic(a), italic(sigma[a]))", x = 0, y = 0.35, hjust = 0.5, vjust = 1, parse = TRUE) +
+  label_(label = "italic(t[nu])(italic(mu), italic(sigma))", x = 0, y = 0.35, hjust = 0.5, vjust = 1, parse = TRUE) +
   labs(y = NULL, x = NULL)
 
 p
@@ -240,10 +242,12 @@ m_mpg = brm(
   data = cars, 
   iter = 5000, 
   cores = 4, 
-  save_model = "models/m_mpg.rds"
+  save_model = "models/m_mpg.rds",
+  seed = 3142013
 )
 ```
 ```{r}
+set.seed(9304929)
 preds = data.frame(weight = seq(min(cars$weight), max(cars$weight), length.out = 100))
 preds = preds |>
   mutate(mpg_given_weight = rvar(posterior_predict(m_mpg, preds)))
@@ -282,9 +286,9 @@ ggsave("figs/3-lineribbon_fan.pdf", device = cairo_pdf)
 
 ```{r slab_density_two_groups, fig.width = 2.5, fig.height = 2}
 two_a = data.frame(
-  nu = c(5, 60),
+  nu = c(8, 60),
   mu = c(6, 1),
-  sigma = c(1.3, 1.1),
+  sigma = c(1.6, 1.1),
   group = factor(c("a", "b"))
 )
 
@@ -294,8 +298,8 @@ p = two_a |>
   bracket_(x = 14, y = 2, yend = 2.9) +
   bracket_(x = 14, y = 1, yend = 1.9) +
   label_(x = 13.5, y = 2.5, label = "thickness", fontface = "italic", hjust = 1, vjust = 0.9) +
-  label_(x = 13.5, y = c(1, 2), label = "0", hjust = 1, vjust = 0.2) +
-  label_(x = 13.5, y = c(1.9, 2.9), label = "max(italic(f[M](x)))", parse = TRUE, hjust = 1, vjust = 0.8) +
+  label_(x = 13.5, y = c(1.01, 2.01), label = "0", hjust = 1, vjust = 0.2) +
+  label_(x = 13.5, y = c(1.92, 2.92), label = "max(italic(f[M](x)))", parse = TRUE, hjust = 1, vjust = 0.8) +
   scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
   scale_y_discrete(expand = expansion(0.15)) +
   labs(x = NULL)
@@ -425,7 +429,7 @@ ggsave("figs/3-slab_rope.pdf", device = cairo_pdf)
 ```{r 3-jacobian-lognorm, fig.width=2.5, fig.height = 1.5}
 p = ggplot() +
   stat_function(fun = \(x) dlnorm(x, 0, 1), n = 1000, fill = "gray75", geom = "area") +
-  geom_vline(xintercept = 1, color = label_color) +
+  geom_vline(xintercept = 1, color = label_color, linewidth = 0.5) +
   label_(x = 1.3, y = 0.625, label = "median") +
   scale_x_continuous(limits = c(0, 10), breaks = 0:10) +
   scale_y_continuous(breaks = NULL) +
@@ -438,7 +442,7 @@ ggsave("figs/3-jacobian-lognorm.pdf", device = cairo_pdf)
 ```{r 3-jacobian-incorrect, fig.width=2.5, fig.height = 1.5}
 p = ggplot() +
   stat_function(fun = \(x) dlnorm(x, 0, 1), n = 1000, geom = "area", fill = "gray75") +
-  geom_vline(xintercept = 1, color = label_color) +
+  geom_vline(xintercept = 1, color = label_color, linewidth = 0.5) +
   label_(x = 1.35, y = 0.625, label = "median???") +
   scale_x_log10(limits = 10^c(-2,2), breaks = 10^(-2:2), labels = as.character) +
   scale_y_continuous(breaks = NULL) +
@@ -451,7 +455,7 @@ ggsave("figs/3-jacobian-incorrect.pdf", device = cairo_pdf)
 ```{r 3-jacobian-correct, fig.width=2.5, fig.height = 1.5}
 p = ggplot() +
   stat_slab(aes(xdist = dist_lognormal(0, 1)), scale = 1, fill = "gray75") +
-  geom_vline(xintercept = 1, color = label_color) +
+  geom_vline(xintercept = 1, color = label_color, linewidth = 0.5) +
   label_(x = 1.75, y = 0.95, label = "median :)") +
   scale_x_log10(limits = 10^c(-2,2), breaks = 10^(-2:2), labels = as.character) +
   scale_y_continuous(breaks = NULL) +
