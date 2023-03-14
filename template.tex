@@ -139,11 +139,11 @@
 
 %% \section{Introduction} %for journal use above \firstsection{..} instead
 
-Uncertainty visualization, generally speaking, has only basic support in existing implementations of the grammar of graphics. Popular implementations like \textit{ggplot2}, \textit{Vega-lite}, and \textit{Observable Plot} typically provide versions of error bars (for points), uncertainty bands (for lines), boxplots, and density plots. Research in uncertainty visualization has long revealed problems with all of these representations and proposed a variety of alternative uncertainty representations to replace them. Examples include quantile dotplots, gradient error bars, gradient plots, gradient bands, and eye plots. Yet, most of these alternative representations are---simply put---painful to convince existing grammar of graphics implementations to produce.
+The grammar of graphics~\cite{wilkinson2012grammar} has become ubiquitous, providing the foundation for a variety of visualization toolkits. Yet support for uncertainty visualization in grammar graphics implementations, generally speaking, remains rudimentary. Popular implementations like \textit{ggplot2}~\cite{wickham2010layered,wickham2011ggplot2} and \textit{Vega-lite}~\cite{satyanarayan2016vega} typically provide versions of error bars (for points), uncertainty bands (for lines), boxplots, and density plots. However, research in uncertainty visualization has developed a rich variety of alternative uncertainty representations, often designed to address shortcomings in those existing visualization types. Examples include, but are not limited to, quantile dotplots~\cite{kay2016ish,fernandes2018uncertainty}, gradient error bars~\cite{correll2014error}, gradient plots~\cite{bowman2019graphics,jackson2008displaying}, fan charts~\cite{jackson2008displaying}, and innumerable variations on eye plots~\cite{helske2021can,kay2016ish,barrowman2003raindrop,spiegelhalter1999surgical}. Yet, most of these alternative representations are---simply put---painful to convince existing grammar of graphics implementations to produce.
 
-\textit{ggdist} is an attempt to rectify this situation. It started under the guise of \textit{tidybayes}---an R package I wrote for post-processing Bayesian models for use with \textit{ggplot2}---in about 2016. I published \textit{tidybayes} to CRAN (the Comprehensive R Archive Network) in 2018, and it slowly gained some use in the Bayesian statistics community. However, the package had two complementary, but not always perfectly aligned, use cases: post-processing Bayesian model output for visualization, and uncertainty visualization in the grammar of graphics. The latter is bigger than \textit{just} Bayesian statistics: everyone needs to visualize uncertainty! And, contrary to popular opinion---as I'll demonstrate later---Bayesian and frequentist uncertainty visualization can in fact be done within the same framework. Recognizing this broader need, in 2020 I spun off the uncertainty visualization components of \textit{tidybayes} into a new package, \textit{ggdist}, and published it to CRAN. Since then it has steadily grown in use inside and outside the Bayesian statistics community in R, and now averages about 14,000 downloads per month (best described as ``modest'' for an R package).
+\textit{ggdist} is an attempt to rectify this situation. It started under the guise of \textit{tidybayes}---an R package I wrote for post-processing Bayesian models for use with \textit{ggplot2}---in about 2016. I published \textit{tidybayes} to \textsc{cran} (the Comprehensive R Archive Network) in 2018, and it slowly gained some use in the Bayesian statistics community. However, the package had two complementary, but not always perfectly aligned, use cases: post-processing Bayesian model output for visualization, and uncertainty visualization in the grammar of graphics. The latter is bigger than \textit{just} Bayesian statistics: everyone needs to visualize uncertainty! And, contrary to popular opinion---as I'll demonstrate later---Bayesian and frequentist uncertainty visualization can in fact be done within the same framework. Recognizing this broader need, in 2020 I spun off the uncertainty visualization components of \textit{tidybayes} into a new package, \textit{ggdist}, and published it to CRAN. Since then it has steadily grown in use inside and outside the Bayesian statistics community in R, and now averages about 14,000 downloads per month (best described as ``modest'' for an R package).
 
-Over the course of its continuing development, I have learned a lot about how to integrate uncertainty visualization into the grammar of graphics, and developed a formal way of describing that integration (more on that later). In the spirit of recent retrospectives on visualization system design~\textbf{CITE}, I'd like to distill down some of what I've learned here.\footnote{And in the spirit of this being a retrospective, I'm keeping the tone informal. I think that's more honest; and besides, after two years of a pandemic, I at least need a break from stilted academic writing. I hope you do too! If not, whatever.} Ultimately, what would be nice to have---and what I hope to demonstrate \textit{ggdist} to be---is a coherent extension to the grammar of graphics that makes it easy to create the various proposed alternative uncertainty visualizations from the literature, \textit{and more}. By  ``and more'' I mean: not only should we be able to express a variety of uncertainty visualizations through a single coherent framework, but that framework should be complete enough that someone else can wander along and express new uncertainty visualization types I've never thought of before (emphasis on \textit{I}---I think a formalism and its corresponding \textsc{api} truly shows its power when people make things with it that its creator has never thought of before). I'll do this by grounding the design of \textit{ggdist} in a formal representation of uncertainty through mappings of functions of distributions onto visual channels or \textit{aesthetics}. As time is a straight arrow, I can't provide direct evidence that there are visualization types I've never seen before that can be created with \textit{ggdist}, but I will describe instances in which I have encountered uncertainty visualizations in the literature and subsequently realized they were straightforward to express in \textit{ggdist}.
+Over the course of its continuing development, I have learned a lot about how to integrate uncertainty visualization into the grammar of graphics, and developed a formal way of describing that integration (more on that later). In the spirit of recent retrospectives on visualization system design~\textbf{CITE}, I'd like to distill down some of what I've learned here.\footnote{In the spirit of this being a retrospective, I'm keeping the tone informal. I think that's more honest; besides, after two years of a pandemic, I at least need a break from stilted academic writing. I hope you do too! If not, my condolences.} Ultimately, what would be nice to have---and what I hope to demonstrate \textit{ggdist} to be---is a coherent extension to the grammar of graphics that makes it easy to create the various proposed alternative uncertainty visualizations from the literature, \textit{and more}. By  ``and more'' I mean: not only should we be able to express a variety of uncertainty visualizations through a single coherent framework, but that framework should be complete enough that someone else can wander along and express new uncertainty visualization types I've never thought of before (emphasis on \textit{I}---I think a formalism and its corresponding \textsc{api} truly shows its power when people make things with it that its creator has never thought of before). I'll do this by grounding the design of \textit{ggdist} in a formal representation of uncertainty through mappings of functions of distributions onto visual channels or \textit{aesthetics}. As time is a straight arrow, I can't provide direct evidence that there are visualization types I've never seen before that can be created with \textit{ggdist}, but I will describe instances in which I have encountered uncertainty visualizations in the literature and subsequently realized they were straightforward to express in \textit{ggdist}.
 
 Ultimately, given the huge expressive power of the grammar of graphics and the popularity of tools built on it, I hope a catalog of my experiences here might provide a catalyst for improved implementations of uncertainty visualization to flourish in existing grammar of graphics ecosystems. Let's give it a try.
 
@@ -151,7 +151,7 @@ Ultimately, given the huge expressive power of the grammar of graphics and the p
 
 \subsection{A simplified notation for the grammar of graphics}
 
-To be able to talk more generally than a specific grammar of graphics implementation, we'll at least need a formal way of writing down visualization specifications separated from a particular implementation. I'll adopt here a notation that I've found works pretty well when I teach the grammar of graphics to undergraduates. I've used a variation on this notation when teaching \textit{ggplot2}, \textit{Vega-lite}, \textit{Altair}, and \textit{Tableau} and found students pick it up easily, which is at least some evidence it might be easy for folks to understand. The core notation describes a visualization in terms of its \textit{data variables}, \textit{aesthetic mappings}, and \textit{geometries}. We create a scatterplot, for example, by mapping one variable onto the \textit{x} aesthetic and another onto the \textit{y} aesthetic:
+To be able to talk more generally than a specific grammar of graphics implementation, we'll at least need a formal way of writing down visualization specifications separated from a particular implementation. I'll adopt here a notation that I've found works pretty well when I teach the grammar of graphics to undergraduates. I've used a variation on this notation when teaching \textit{ggplot2}, \textit{Vega-lite}, \textit{Altair}, and \textit{Tableau} and found students pick it up easily, which is at least some evidence it might be easy for folks to understand. The core notation describes a visualization in terms of its \textit{data variables}, \textit{aesthetic mappings}, and \textit{geometries}. We create a scatterplot, for example, by mapping one variable onto the \textit{x} aesthetic and another onto the \textit{y} aesthetic:\footnote{I am aware it is traditional to slap a number on each figure and float it off into a random corner of the page. I violate that norm throughout this paper without remorse.}
 
 \hfill\break
 \noindent
@@ -179,7 +179,7 @@ ggplot(cars) +
   geom_point()
 \end{centerverbatim}
 
-Or in \textit{Vega-lite}:\footnote{I use the Vega-lite \textsc{api} instead of its \textsc{json} form, as \textsc{json} is a horrifying mess of visual noise that no sane human should want to read or write. The Vega-lite \textsc{api} is a notable improvement, though without R's facility for capturing and re-writing abstract syntax trees, it doesn't quite reach the succinctness of \textit{ggplot2}. This seems to be a fundamental limitation when writing domain-specific languages in JavaScript, and the \textit{Vega-lite} authors have done an excellent job with the language they've been given.}
+Or in \textit{Vega-lite}:\footnote{I use the Vega-lite \textsc{api} instead of its \textsc{json} form, as \textsc{json} is a horrifying mess of visual noise that no sane human should want to read or write. The Vega-lite \textsc{api} is a notable improvement, though without R's facility for capturing and re-writing abstract syntax trees, it doesn't quite reach the succinctness of \textit{ggplot2}. This seems to be a fundamental limitation when writing domain-specific languages in JavaScript, though the \textit{Vega-lite} authors have done an excellent job with the language they've been given.}
 
 \begin{centerverbatim}
 vl.data("path/to/cars.json")
@@ -196,13 +196,13 @@ This shows the close correspondence between the abstract notation above and the 
 
 Speaking of existing implementations of the grammar of graphics, how do they implement uncertainty visualization? Rudimentarily, I think.
 
-One natural approach to uncertainty visualization is to assume a Gaussian approximation: to represent all estimates and their uncertainty as a mean and standard deviation. This makes the specification problem easy: instead of mapping a single value onto the \textit{x} aesthetic, say, we map a point estimate onto \textit{x} and provide an aesthetic for its standard deviation; call it $x_\textsc{sd}$. Say we had estimated a variable $a$ and had quantified its standard error (i.e. the standard deviation of its sampling distribution) as $\sigma_a$, we might plot a point with an error bar using a \textit{pointinterval} geometry as follows, yielding a 95\% interval calculated from a Normal distribution with mean $a$ and standard deviation $\sigma_a$:
+One natural approach to uncertainty visualization is to assume a Gaussian approximation: to represent all estimates and their uncertainty as a mean and standard deviation. This makes the specification problem easy: instead of mapping a single value onto the \textit{x} aesthetic, say, we map a point estimate onto \textit{x} and provide an aesthetic for its standard deviation; call it $x_\textsc{sd}$. Say we had estimated a variable $\mu$ and had quantified its standard error (i.e. the standard deviation of its sampling distribution) as $\sigma$, we might plot a point with an error bar using a \textit{pointinterval} geometry as follows, yielding a 95\% interval calculated from a Normal distribution with mean $\mu$ and standard deviation $\sigma$:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
 \begin{align*}
-a &\rightarrow x\\
-\sigma_a &\rightarrow x_\textsc{sd}\\
+\mu &\rightarrow x\\
+\sigma &\rightarrow x_\textsc{sd}\\
 \textsc{geom} &= \mathit{pointinterval}
 \end{align*}
   \end{minipage}%
@@ -220,9 +220,9 @@ The obvious alternative, at least for interval representations, is to simply spe
 \noindent
 \begin{minipage}{.5\columnwidth}
 \begin{align*}
-a &\rightarrow x\\
-a - 1.96 \cdot \sigma_a &\rightarrow x_\textsc{min}\\
-a + 1.96 \cdot \sigma_a &\rightarrow x_\textsc{max}\\
+\mu &\rightarrow x\\
+\mu - 1.96 \cdot \sigma &\rightarrow x_\textsc{min}\\
+\mu + 1.96 \cdot \sigma &\rightarrow x_\textsc{max}\\
 \textsc{geom} &= \mathit{pointinterval}
 \end{align*}
   \end{minipage}%
@@ -240,22 +240,22 @@ I will offer a different solution: to instead represent intervals as properties 
 
 \subsection{Intervals}
 
-Imagine we represent an uncertain value generically as a distribution, or a random variable, $A$. Importantly, I do not consider this a \textit{probability} distribution necessarily: it could be a probability distribution, but it could also be a \textit{confidence} distribution, which is a frequentist generalization of sampling distributions and bootstrap distributions~\textbf{CITE}. Its defining characteristic will be that it has a cumulative distribution function (\textsc{cdf}), $F_A(x)$, which is:
+Imagine we represent an uncertain value generically as a distribution, or a random variable, $M$. Importantly, I do not consider this a \textit{probability} distribution necessarily: it could be a probability distribution, but it could also be a \textit{confidence} distribution, which is a frequentist generalization of sampling distributions and bootstrap distributions~\textbf{CITE}. Its defining characteristic will be that it has a cumulative distribution function (\textsc{cdf}), $F_M(x)$, which is:
 \begin{itemize}
-    \item For a probability distribution, $F_A(x) = \Pr(A \le x)$, the probability that $A$ is less than or equal to $x$.
-    \item   For a confidence distribution, $F_A(x) = \gamma$  is the confidence $\gamma$ at which $x$ would be the upper limit of a one-sided $\gamma\%$ confidence interval, $[-\infty, x]$, for $A$. That sentence is pretty typical of convoluted frequentist definitions, so it might be easier to think in terms of the inverse: $F_A^{-1}(\gamma)$ yields the value $x$, which is the upper limit of a one-sided $\gamma\%$ confidence interval on $A$: $[-\infty,x]$. So $[-\infty, F_A^{-1}(0.95)]$ is a one-sided 95\% confidence interval on $A$.
+    \item For a probability distribution, $F_M(x) = \Pr(M \le x)$, the probability that $M$ is less than or equal to $x$.
+    \item   For a confidence distribution, $F_M(x) = \gamma$  is the confidence $\gamma$ at which $x$ would be the upper limit of a one-sided $\gamma\%$ confidence interval, $[-\infty, x]$, for $M$. That sentence is pretty typical of convoluted frequentist definitions, so it might be easier to think in terms of the inverse: $F_M^{-1}(\gamma)$ yields the value $x$, which is the upper limit of a one-sided $\gamma\%$ confidence interval on $M$: $[-\infty,x]$. So $[-\infty, F_A^{-1}(0.95)]$ is a one-sided 95\% confidence interval on $M$.
 \end{itemize}
 
-For either representation, we may also be interested in other functions of the distribution. These include the derivative of the cumulative distribution function, i.e. the density function (or the mass function, if the distribution is discrete), $f_A(x)$, as well as the inverse of the \textsc{cdf} (also known as the quantile function), $F_A^{-1}(x)$. Given these functions, we can generate a variety of uncertainty representations, including but not limited to density plots and intervals.
+For either representation, we may also be interested in other functions of the distribution. These include the derivative of the cumulative distribution function, i.e. the density function (or the mass function, if the distribution is discrete), $f_M(x)$, as well as the inverse of the \textsc{cdf} (also known as the quantile function), $F_M^{-1}(x)$. Given these functions, we can generate a variety of uncertainty representations, including but not limited to density plots and intervals.
 
-For example, a median and $\gamma\%$ quantile interval could be defined generically on any distribution $A$ as follows:
+For example, a median and $\gamma\%$ quantile interval could be defined generically on any distribution $M$ as follows:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
 \begin{align*}
-\operatorname{median}(A) &\rightarrow x\\
-F_A^{-1}\left(\frac{1 - \gamma}{2}\right) &\rightarrow x_\textsc{min}\\
-F_A^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
+\operatorname{median}(M) &\rightarrow x\\
+F_M^{-1}\left(\frac{1 - \gamma}{2}\right) &\rightarrow x_\textsc{min}\\
+F_M^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
 \textsc{geom} &= \mathit{pointinterval}
 \end{align*}
 \end{minipage}%
@@ -265,15 +265,15 @@ F_A^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
   \end{minipage}
 \hfill\break
 
-If $A$ is a probability distribution, this is a Bayesian \textit{credible }interval, and if $A$ is a confidence distribution, this is a frequentist \textit{confidence} interval. This lets us abstract over the petty battles between this or that statistical camp and get to the meaningful business of visualizing uncertainty. This also allows us something not present in other attempts so far: to make it easy to specific multiple interval sizes, and to map interval size itself onto an aesthetic. For example, if we\footnote{Yes yes, I am using both ``I'' and ``we'' in this paper. ``I'' is me, and ``we'' is the conspiratorial ``we'': I'd like to hope you'll come with me on the journey of trying to sort out reasonable ways of visualizing uncertainty.} wanted to show two intervals, a 95\% and a 66\%, where the smaller interval is shown as a thicker line, we could write:
+If $M$ is a probability distribution, this is a Bayesian \textit{credible }interval, and if $M$ is a confidence distribution, this is a frequentist \textit{confidence} interval. This lets us abstract over the petty battles between this or that statistical camp and get to the meaningful business of visualizing uncertainty. This also allows us something not present in other attempts so far: to make it easy to specific multiple interval sizes, and to map interval size itself onto an aesthetic. For example, if we\footnote{Yes yes, I am using both ``I'' and ``we'' in this paper. ``I'' is me, and ``we'' is the conspiratorial ``we'': I'd like to hope you'll come along with me on this exciting journey of trying to sort out reasonable ways to visualize uncertainty.} wanted to show two intervals, a 95\% and a 66\%, where the smaller interval is shown as a thicker line, we could write:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
-\operatorname{median}(A) &\rightarrow x\\
-F_A^{-1}\left(\frac{1 - \gamma}{2}\right) &\rightarrow x_\textsc{min}\\
-F_A^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
+\operatorname{median}(M) &\rightarrow x\\
+F_M^{-1}\left(\frac{1 - \gamma}{2}\right) &\rightarrow x_\textsc{min}\\
+F_M^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
 -\gamma &\rightarrow \mathit{linewidth}\\
 \textsc{geom} &= \mathit{pointinterval}\\
 \gamma &\in \{0.66, 0.95\}
@@ -285,7 +285,7 @@ F_A^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
   \end{minipage}
 \hfill\break
 
-This is a not uncommon approach that tries to avoid dichotomous thinking by showing multiple intervals of different masses. It also has the nice grammar-of-graphics-ish property of mapping the mass ($\gamma$) onto the width of the line, instead of creating two explicit, separate layers, each specifying a different interval---it makes the mass into \textit{data}.\footnote{I learned at least two useful things from a relational databases class in undergrad: (1) it's always better to put data into rows than into column names of tables---an insight that stems from database \textit{normal forms}~\textbf{CITE} (distinctions between which I have long forgotten) or what some statisticians call \textit{tidy data}~\textbf{CITE}; and (2) you are rarely at Google scale, so you're probably better off with a relational database with proper transactions than some dumb old key value store. The latter lesson my grad students refuse to learn until they build a webapp to collect data from 300 participants using some newfangled database they aren't the target users for, and end up with garbage. Kids these days, etc.} This also makes it easy to generalize to other visualizations, e.g. by modifying the previous specification to map mass onto \textit{color} instead of \textit{linewidth}:
+This is a not uncommon approach that tries to avoid dichotomous thinking by showing multiple intervals of different masses. It also has the nice grammar-of-graphics-ish property of mapping the mass ($\gamma$) onto the width of the line, instead of creating two explicit, separate layers, each specifying a different interval---it makes the mass into \textit{data}.\footnote{I learned at least two useful things from a relational databases class in undergrad: (1) it's always better to put data into rows than into column names of tables---an insight that stems from database \textit{normal forms}~\textbf{CITE} (distinctions between which I have long forgotten) or what some statisticians call \textit{tidy data}~\textbf{CITE}; and (2) you are rarely at Google scale, so you're probably better off with a relational database with proper transactions than some dumb old key value store. The latter lesson each of my students refuses to learn until they build a webapp to collect data from 300 people using some newfangled database they aren't the target users for, and end up with garbage. Kids these days, etc.} This also makes it easy to generalize to other visualizations, e.g. by modifying the previous specification to map mass onto \textit{color} instead of \textit{linewidth}:
 
 
 \noindent
@@ -311,7 +311,7 @@ On the other hand, these are still a bit low-level: they require the user to kno
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
-A &\rightarrow x_\textsc{dist}\\
+M &\rightarrow x_\textsc{dist}\\
 \textsc{stat} &= \mathit{pointinterval}\\
 \textsc{point} &= \mathit{median}\\
 \textsc{interval} &= \textit{quantile interval}\\
@@ -324,7 +324,7 @@ A &\rightarrow x_\textsc{dist}\\
   \end{minipage}
 \hfill\break
 
-The representation of the distribution $A$ could be a sample-based representation, e.g. a bunch of draws from a Bayesian posterior or from a bootstrap distribution, or it could be an object representing a theoretical distribution in terms of its parameters, such as a Normal distribution with a defined mean and standard deviation. Point estimates and interval types can be defined by arbitrary functions of distributions, and predefined functions for mean, median, and mode, and quantile, highest-density, and shortest intervals are provided. This generalizes the $\{x, x_\textsc{sd}\}$ approach used by \textit{Vega-lite} to any distribution type while abstracting over the specifics of how point estimates and intervals are calculated.
+The representation of the distribution $M$ could be a sample-based representation, e.g. a bunch of draws from a Bayesian posterior or from a bootstrap distribution, or it could be an object representing a theoretical distribution in terms of its parameters, such as a Normal distribution with a defined mean and standard deviation. Point estimates and interval types can be defined by arbitrary functions of distributions, and predefined functions for mean, median, and mode, and quantile, highest-density, and shortest intervals are provided. This generalizes the $\{x, x_\textsc{sd}\}$ approach used by \textit{Vega-lite} to any distribution type while abstracting over the specifics of how point estimates and intervals are calculated.
 
 In implementation, \textit{ggdist} allows distributions to be represented by numeric vectors (sample-based representation), objects from the \textit{distributional } R package (which supports theoretical distributions), and \texttt{rvar} objects from the \textit{posterior} R package (a sample-based representation that mimics numeric arrays in R). For example, if we re-create the $\{x, x_\textsc{sd}\}$ representation abstractly thus:
 
@@ -332,7 +332,7 @@ In implementation, \textit{ggdist} allows distributions to be represented by num
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
-\operatorname{Normal}(a, \sigma_a) &\rightarrow x_\textsc{dist}\\
+\operatorname{Normal}(\mu, \sigma) &\rightarrow x_\textsc{dist}\\
 \textsc{stat} &= \mathit{pointinterval}\\
 \textsc{point} &= \mathit{median}\\
 \textsc{interval} &= \textit{quantile interval}\\
@@ -349,20 +349,20 @@ In \textit{ggdist}, using \texttt{distributional::dist\_normal}, the specificati
 
 \begin{centerverbatim}
 ggplot(data) +
-  aes(xdist = dist_normal(a, sigma_a)) +
+  aes(xdist = dist_normal(mu, sigma)) +
   stat_pointinterval(
     point_interval = median_qi, 
     .width = c(.66, .95)
   )
 \end{centerverbatim}
 
-These happen to be the default values for \texttt{point\_interval} and \texttt{.width} ($\gamma$),\footnote{For historical reasons that have to do with a combination of a very long discussion with a bunch of people on the Stan forums~\textbf{CITE} and naming conventions in some R \textsc{api}s for fixed arguments to functions with variable argument lists~\textbf{CITE}, $\gamma$ in \textit{ggdist} is spelled \texttt{.width}. Reflecting on my past mistakes, a better name would be  \texttt{mass}.} so just \texttt{stat\_pointinterval()}  also works here. To demonstrate generalizing this approach, consider the very common need of placing uncertainty intervals on the results of a $t$-test, which can be derived from a $t_\nu(\mu, \sigma)$  distribution with $\nu$ degrees of freedom, scale $\mu$ (e.g. an estimated mean), and scale $\sigma$ (e.g. a standard error). Given these three numbers in a data frame, a visualization specification might be:
+These happen to be the default values for \texttt{point\_interval} and \texttt{.width} ($\gamma$),\footnote{For historical reasons that have to do with a combination of a very long discussion with a bunch of people on the Stan forums~\cite{kay2018stannames} and naming conventions in some R \textsc{api}s for fixed arguments to functions with variable argument lists~\cite{tidyverse2020dotprefix}, $\gamma$ in \textit{ggdist} is spelled \texttt{.width}. Reflecting on my past mistakes, a better name would be  \texttt{mass}.} so just \texttt{stat\_pointinterval()}  also works here. To demonstrate generalizing this approach, consider the very common need of placing uncertainty intervals on the results of a $t$-test, which can be derived from a $t_\nu(\mu, \sigma)$  distribution with $\nu$ degrees of freedom, scale $\mu$ (e.g. an estimated mean), and scale $\sigma$ (e.g. a standard error). Given these three numbers in a data frame, a visualization specification might be:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
-t_{\nu_a}(a, \sigma_a) &\rightarrow x_\textsc{dist}\\
+t_{\nu}(\mu, \sigma) &\rightarrow x_\textsc{dist}\\
 \textsc{stat} &= \mathit{pointinterval}
 \end{align*}
 \end{minipage}%
@@ -377,7 +377,7 @@ Which in \textit{ggdist} is:
 
 \begin{centerverbatim}
 ggplot(data) +
-  aes(xdist = dist_student_t(nu_a, a, sigma_a)) +
+  aes(xdist = dist_student_t(nu, mu, sigma)) +
   stat_pointinterval()
 \end{centerverbatim}
 
@@ -408,11 +408,11 @@ p(\mathit{mpg} \mid \mathit{weight}) &\rightarrow y_\textsc{dist}\\
 \hfill\break
 
 
-I include the raw data as a separate \textit{point} geometry layer as well, for comparison. Assuming \texttt{m}  is a Bayesian version of such a model fit using the \textit{brms} modeling package in R, and \texttt{preds} is a data frame of desired \textit{weight} values to predict on, we can add a column to \texttt{preds} that contains a random variable representation of $p(\mathit{mpg} \mid \mathit{weight})$ using \texttt{brms::posterior\_predict}~\textbf{CITE} and the \texttt{posterior::rvar}  data type~\textbf{CITE}. The latter is a data type I created\footnote{This was a slightly insane idea in itself, given the way that base R data types work. As R's classes work based on generic \textit{functions}, rather than classes with a well-defined set of methods, this requires tracking down all the various functions implemented to work with arrays and vectors in the language and providing implementations for them for random variable arrays. Indexing functions especially are annoying, as there are half a dozen different ways to index into R arrays, each with myriad corner cases. Anyway.} specifically to wrap large samples that represent distributions into objects that mimic R vectors and arrays, and which can be added to data frames:
+I include the raw data as a separate \textit{point} geometry layer as well, for comparison. Assuming \texttt{fit}  is a Bayesian version of such a model fit using the \textit{brms} modeling package in R, and \texttt{preds} is a data frame of desired \textit{weight} values to predict on, we can add a column to \texttt{preds} that contains a random variable representation of $p(\mathit{mpg} \mid \mathit{weight})$ using \texttt{brms::posterior\_predict}~\textbf{CITE} and the \texttt{posterior::rvar}  data type~\textbf{CITE}. The latter is a data type I created\footnote{This was a slightly insane idea in itself, given the way that base R data types work. As R's classes work based on generic \textit{functions}, rather than classes with a well-defined set of methods, this requires tracking down all the various functions implemented to work with arrays and vectors in the language and providing implementations for them for random variable arrays. Indexing functions especially are annoying, as there are half a dozen different ways to index into R arrays, each with myriad corner cases. Anyway.} specifically to wrap large samples that represent distributions into objects that mimic R vectors and arrays, and which can be added to data frames:
 
 \begin{centerverbatim}
 preds = preds |> mutate(
-  mpg_given_weight = rvar(posterior_predict(m, preds)
+  mpg_given_weight = rvar(posterior_predict(fit, preds)
 )
 \end{centerverbatim}
 
@@ -449,13 +449,13 @@ This set of $k$  $\gamma$ values is the same sequence generated by the \texttt{p
 
 Speaking of gradients, the obvious other direction to go for uncertainty---if we are to move beyond intervals---is density plots. Most grammar of graphics implementations have an implementation of density plots, but these are typically designed only for sample-based representations: they calculate a kernel density estimate (\textsc{kde}) from a sample and allow this to be visualized. Given \textit{ggdist}'s core abstraction of distributions, we can take this a step further, visualizing both sample-based representations and theoretical distributions.\footnote{\label{foot:jacobians}You may be tempted to say: but Matthew, of course you could easily pre-calculate densities from a theoretical density function and plot them. Unfortunately, once you add non-linear axis transformation into the mix, this is a recipe for silent errors caused by failing to adjust the density by the derivative of the transformation; an error \textit{ggdist} prevents. See \cref{sec:jacobians}.} 
 
-However, stopping at \textit{just} densities seems the wrong level of abstraction:\footnote{See earlier footnote\textsuperscript{\ref{foot:errorbar}} about \textit{error bars} versus \textit{intervals}.} many useful uncertainty visualizations can be created through the whole suite of distributional functions: \textsc{cdf}s, densities, and quantiles. Thus, \textit{ggdist} instead has a notion of a \textit{slab} geometry, which has a \textit{thickness} onto which arbitrary functions of the distribution can be mapped. For example, imagine two \textit{group}s, \textit{a} and \textit{b}, each with uncertainty in its mean represented by a \textit{t}-distributed random variable $M \mid group$ with degrees of freedom $\nu$, mean $\mu$, and scale $\sigma$. We could specify a density plot of these distributions as:
+However, stopping at \textit{just} densities seems the wrong level of abstraction:\footnote{See earlier footnote\textsuperscript{\ref{foot:errorbar}} about \textit{error bars} versus \textit{intervals}.} many useful uncertainty visualizations can be created through the whole suite of distributional functions: \textsc{cdf}s, densities, and quantiles. Thus, \textit{ggdist} instead has a notion of a \textit{slab} geometry, which has a \textit{thickness} onto which arbitrary functions of the distribution can be mapped. For example, imagine two \textit{group}s, \textit{a} and \textit{b}, each with uncertainty in its mean represented by a random variable $M \mid group$. We could specify a density plot of these distributions as:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
-t_\nu(\mu, \sigma) &\rightarrow x_\textsc{dist}\\
+M &\rightarrow x_\textsc{dist}\\
 \textit{group} &\rightarrow y\\
 f_M(x) &\rightarrow \textit{thickness}\\
 \textsc{stat} &= \mathit{slab}
@@ -483,7 +483,7 @@ Slab geometries have several useful properties which help make them useful for c
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
-t_\nu(\mu, \sigma) &\rightarrow x_\textsc{dist}\\
+M &\rightarrow x_\textsc{dist}\\
 \textit{group} &\rightarrow y\\
 f_M(x) &\rightarrow \textit{alpha}\\
 \textsc{stat} &= \mathit{slab}
@@ -501,7 +501,7 @@ Which translates naturally to \texttt{aes(alpha = !!p\_(x))}. Fine fine, but let
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
--max \left( \begin{matrix} \lvert 2 F_M(x) - 1 \rvert \\ 0.95 \end{matrix} \right) &\rightarrow \textit{alpha}\\
+-\max \left[ \begin{matrix} \lvert 2 F_M(x) - 1 \rvert \\ 0.95 \end{matrix} \right] &\rightarrow \textit{alpha}\\
 \textsc{stat} &= \mathit{slab}
 \end{align*}
 \end{minipage}%
@@ -524,7 +524,7 @@ Thus, \textit{ggdist} can create this particularly weird uncertainty visualizati
 
 \begin{align*}
 f_M(x) &\rightarrow \textit{thickness}\\
--max \left( \begin{matrix} \lvert 2 F_M(x) - 1 \rvert \\ 0.85 \end{matrix} \right) &\rightarrow \textit{alpha}\\
+-\max \left[ \begin{matrix} \lvert 2 F_M(x) - 1 \rvert \\ 0.85 \end{matrix} \right] &\rightarrow \textit{alpha}\\
 \textsc{stat} &= \mathit{slab}\\
 \textsc{side} &= \mathit{both}
 \end{align*}
@@ -555,7 +555,7 @@ f_M(x) &\rightarrow \textit{thickness}\\
   \end{minipage}
 \hfill\break
 
-Helske describes these violin-interval plots as ``more challenging to create''; \textit{ggdist} supports them naturally through a combination of its features not \textit{specifically} designed to create these plots. Another variation on violin plots is the \textit{raindrop plot} of Barrowman and Myers~\cite{barrowman2003raindrop}, which maps log-density instead of density onto \textit{thickness} inside a desired interval, say 95\%. Let's combine that with a \textit{pointinterval} (spec not shown):
+Helske describes these violin-interval plots as ``more challenging to create''; \textit{ggdist} supports them naturally through a combination of its features not \textit{specifically} designed to create these plots. Another variation on violin plots is the \textit{raindrop plot} of Barrowman and Myers~\cite{barrowman2003raindrop}, which maps log-density instead of density onto \textit{thickness} inside a desired interval, say 95\%. Let's combine that with a \textit{pointinterval} (spec for the latter not shown):
 
 
  \noindent
@@ -576,13 +576,13 @@ Helske describes these violin-interval plots as ``more challenging to create''; 
 The rationale here is that some distributional features, such as fat tails (kurtosis), can be easier to see in log-density than density~\cite{barrowman2003raindrop}. In \textit{ggdist}, the above spec is written:
 
 \begin{centerverbatim}
-aes(thickness = after_stat(ifelse(.width <= .95, log(pdf), NA))) +
+aes(thickness = ifelse(.width <= .95, log(!!p_(x)), NA)) +
 stat_slab(side = "both", normalize = "groups")
 \end{centerverbatim}
 
-Where \texttt{normalize = "groups"} is needed to tell the slab to normalize thickness on a per-group basis, as log-density does not have a natural zero point.
+Where \texttt{normalize = "groups"} is needed to tell the slab to normalize thickness on a per-group basis, as log-density does not have a natural zero point. Without this, the endpoints of the arcs defining the ``raindrops'' may not reach the \textit{thickness} baseline.
 
-Another interesting\footnote{\textsc{aka} weird.}\footnote{Yes, there are a lot of footnotes. No, I don't care.} uncertainty visualization from the literature is Haber and Wilkinson's~\cite{haber1982perceptual} \textit{fuzzygram}, i.e. a \textit{fuzzy histogram} (or more generally, a \textit{fuzzy bar chart}). This chart type has what I would call a compelling \textit{generative story}: an explanation you can give for how the uncertainty encoding in the chart arises based on some generative process. Imagine we want to add uncertainty to a bar chart, and we have a distribution for the uncertainty in the value encoded in each bar. Now say we sample a large number of semi-transparent bar charts from these distributions, and overlay them all on top of each other. As the number of charts approaches $\infty$ and the opacity of any given chart goes to 0, the stack of overlapping bars for each value will begin to resemble the complementary \textsc{cdf}, $1 - F(x)$, of that distribution.\footnote{Assuming additive blending and opacities that sum to 1.} That insight leads to the following encoding (with a \textit{pointinterval} overlaid for reference):
+Another interesting\footnote{\textsc{aka} weird.}\footnote{Yes, there are a lot of footnotes. No, I don't care.} uncertainty visualization from the literature is Haber and Wilkinson's~\cite{haber1982perceptual} \textit{fuzzygram}, i.e. \textit{fuzzy histogram}. We can generalize it to a \textit{fuzzy bar chart}. This chart type has what I would call a compelling \textit{generative story}: an explanation you can give for how the uncertainty encoding in the chart arises based on some generative process. Imagine we want to add uncertainty to a bar chart, and we have a distribution for the uncertainty in the value encoded in each bar. Now say we sample a large number of semi-transparent bar charts from these distributions, and overlay them all on top of each other. As the number of charts approaches $\infty$ and the opacity of any given chart goes to 0, the stack of overlapping bars for each value will begin to resemble the complementary \textsc{cdf}, $1 - F(x)$, of that distribution.\footnote{Assuming additive blending and opacities that sum to 1.} That insight leads to the following encoding (with a \textit{pointinterval} overlaid for reference):
 
  \noindent
 \begin{minipage}{.5\columnwidth}
@@ -600,7 +600,7 @@ Another interesting\footnote{\textsc{aka} weird.}\footnote{Yes, there are a lot 
 
 I would describe this chart type as theoretically interesting but interpretationally problematic. Anecdotally, without the overlaid reference point and interval, folks I show this to often do not correctly identify the mean of the distribution, believing the darker parts of the bar are more likely (a not unreasonable misinterpretation).\footnote{I don't know if this is an example of within-the-bar bias~\cite{newman2012bar} or not.} On the other hand, I do like the idea of \textit{generative stories} in uncertainty visualization; for example, I've used Plinko boards to depict uncertainty in election forecasts~\textbf{CITE}, which try to capitalize on a physical process---one that might intuitively\footnote{As this is an uncertainty vis paper, I am legally required to use ``intuitive'' at least once without defining it.} feel random to people---to depict uncertainty through a form of \textit{sedimentation}~\textbf{CITE}.
 
-Another advantage to being able to map arbitrary data values onto slab aesthetics is that we can map the results of logical conditions onto those aesthetics. A common procedure in the Bayesian estimation community is to use regions of practical equivalence (\textsc{rope})~\cite{kruschke2018rejecting}. Say, for example, you are interested in whether an estimate is ``practically'' equal to 0; you would define a \textsc{rope} around 0 of $\pm$ some small effect size within which you would consider the value so close to 0 it is effectively indistinguishable from it. Then you can ask questions like, what is the probability the value is practically equivalent to 0? We can visualize this probability by highlighting the \textsc{rope} on a density:
+Another advantage to being able to map arbitrary data values onto slab aesthetics is that we can map the results of logical conditions onto those aesthetics. A common procedure in the Bayesian estimation community is to use regions of practical equivalence (\textsc{rope}s)~\cite{kruschke2018rejecting}. Say, for example, you are interested in whether an estimate is ``practically'' equal to 0; you would define a \textsc{rope} around 0 of $\pm$ some small effect size within which you would consider the value so close to 0 it is effectively indistinguishable from it. Then you can ask questions like, what is the probability the value is practically equivalent to 0? We can visualize this probability by highlighting the \textsc{rope} on a density:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
@@ -619,17 +619,30 @@ f_M(x) &\rightarrow \textit{thickness}\\
 
 Here, $\Pr(\lvert x \rvert < 2)$---the probability the value is in a \textsc{rope} of $\pm2$---is directly encoded by the proportion of the area under the curve highlighted in blue. In \textit{ggplot2}, logical conditions can be mapped directly onto aesthetics, so in \textit{ggdist}, we can use \texttt{aes(fill = after\_stat(abs(x) < 2))} to create the above chart.
 
+\subsection{Dotplots}
+
+\textbf{TODO} Something about dotplots, particularly quantile dotplots, but not too much. Allude to layout algorithms and some of the annoying bits of making dotplots without them.
+
 \subsection{Further examples}
 
-The preceding sections attempt to give a taste for why \textit{ggdist} is structured the way it is, its underlying formalism, and how it extends the grammar of graphics in a principled way to support a variety of uncertainty visualizations. Yet this only scratches the surface of what it can do: the interested reader (hopefully you!) should check out the vignettes in the \href{https://mjskay.github.io/ggdist/}{\textit{ggdist} documentation}, which include a slew of examples not covered here.
+My hope in the preceding sections was to whet your appetite for the possibilities of an uncertainty visualization grammar grounded in distributions. I have attempted to give a taste for why ggdist is structured the way it is, its underlying formalism, and how it extends the grammar of graphics in a principled way to support fluid specification of a variety of uncertainty visualizations. What I've shown only scratches the surface of what \textit{ggdist} can do: the interested reader (hopefully you!) can check out the vignettes in the \href{https://mjskay.github.io/ggdist/}{\textit{ggdist} documentation}, which include a slew of examples not covered here. The \href{https://mjskay.github.io/tidybayes/}{\textit{tidybayes} documentation} is also worth checking out, as it includes more examples of the use of \textit{ggdist} with Bayesian models. I am also continually surprised by what \textit{ggdist} users come up with
 
 \section{Reflections and lessons learned}
 
 \textit{ggdist} has been under development in some form or another for about six--seven years, and over that time has evolved through user feedback and several waves of refactoring and rewriting. Through all that, I'd hope I've learned a few things that may be useful for others tackling uncertainty visualization to consider.
 
 \subsection{Something about dist syntax}
+\textbf{TODO} distributions as core to uncertainty vis, unifying Bayes/freq, power of the syntax itself (making parameters into data, vectorization of arguments to create distributions made the dist+args syntax obsolete, etc)
 
+The core use of distributional visualization to enable a variety of uncertainty visualization types was inspired by our earlier work developing a \textit{Probabilistic Grammar of Graphics} (\textsc{pgog})~\cite{pu2020probabilistic}, which tackled the problem of specifying area and unit visualizations of conditional probability distributions by integrating probability notation into the grammar of graphics. \textsc{pgog} focused mainly on product plots~\cite{wickham2011product}, icon arrays~\cite{ancker2006design}, and dotplots~\cite{wilkinson1999dot}, while \textit{ggdist} expands the expressiveness of a distributional visualization syntax to cover visualization types that are not just functions of density and mass functions, but also functions of \textsc{cdf}s and intervals.\footnote{On the other hand, \textit{ggdist} still does not implement the conditional probability syntax we had in \textsc{pgog}, though the mini-\textsc{dsl} for probability expressions was inspired by it. In a way, \textit{ggdist} has to be more conservative at integrating crazier ideas from research since it has actual users, and also, while the conditional syntax in \textsc{pgog} is elegant for specifying a general class of probabilistic visualizations, its use cases for uncertainty specifically are a little less clear to me. So we'll see.} 
 
+A key insight from working on both \textsc{pgog} and \textit{ggdist} is that bringing notation for probability distributions into the grammar of graphics is a powerful, expressive way to create visualizations of distributions and uncertainty. The additional insight---that frequentist uncertainty visualization can be brought into that same framework under the remit of \textit{confidence distributions}~\cite{xie2013confidence}---frees us from multiple tyrannies: (1) endless battles about whether one should be a frequentist or Bayesian when you just want to get on with visualizing your uncertainty; (2) memorizing silly little formulas\footnote{Pedants get one properly typeset ``formul\ae'' per paper. There it was.} for this or that test statistic; (3) implementing different, mutually incompatible, and wholly brittle code paths for visualizing uncertainty under different statistical paradigms. A better world is possible!
+
+\subsection{Something about shortcut stats/geoms, user feedback, and balancing abstraction and learnability, good defaults}
+
+\textbf{TODO} rainclouds, whwere to draw the line on composite geoms / shortcuts. histograms as slab types or as density estimators. maybe a section on how annoying KDEs are? --- include omething about seeing incorrect vis in the wild, finding good defaults, etc (see also: default points and intervals as median/qi, move to a default KDE that estimates bounds and uses bounded estimator, etc).
+
+Maybe something about the various bits of machinery for distributions: discrete/not, determining support, determining bounds when plotting automatically, etc.
 
 \subsection{Uncertainty is difficult to factor out into data pre-processing}
 \label{sec:jacobians}
@@ -639,7 +652,7 @@ As an earlier footnote alluded,\textsuperscript{\ref{foot:jacobians}}   we must 
 \[
 f_Y(y) = f_X\left(g^{-1}(y)\right) \cdot \left| {g^{-1}}'(y) \right|
 \]
-In other words, if we have a random variable $X$ that we transform via the function $g$ to get $Y$, we must adjust its density values by the factor $\lvert {g^{-1}}'(y) \rvert$, the absolute value of the derivative of the inverse of $g$. To make things concrete, consider a log-Normal variable $X$:
+In other words, if we have a random variable $X$ that we transform via the function $g$ to get $Y$, we must adjust its density values by the factor $\lvert {g^{-1}}'(y) \rvert$, the absolute value of the derivative of the inverse of $g$. For example, consider a log-Normal variable $X$:
 
 \[
 X \sim \operatorname{log-Normal}(0, 1)
@@ -682,7 +695,7 @@ ggplot() +
   \end{minipage}
 \hfill\break
 
-Clearly the median does not divide the area into two regions with equal mass, as it should. I have no doubt this has lead to user errors in \textit{ggplot2}.\footnote{For example, issue \href{https://github.com/tidyverse/ggplot2/issues/4783}{\#4783} in the \textit{ggplot2} repository asks why a theoretical density and samples from a distribution do not line up under transformation---a less attentive user might never have noticed.} Fortunately, \textit{ggdist} does know how to correctly transform densities. It uses a combination of symbolic and (when necessary) numeric differentiation to calculate derivatives of \textit{ggplot2} scale transformations to adjust densities.\footnote{Specifically, \textit{ggdist} applies the built-in \texttt{D} function to get the symbolic derivative of the expression defining the scale function and, if that fails, falls back to \texttt{numDeriv::jacobian}~\textbf{CITE}. In the future, if my pull request \href{https://github.com/r-lib/scales/pull/341}{\#341} to the \textit{scales} package is accepted, \textit{ggdist} will be able to use automatic differentiation instead, which is more reliable.} As a result, we can visualize a log-transformed log-Normal density and get the correct result:
+Clearly the median does not divide the area into two regions with equal mass, as it should. I have no doubt this has led to errors amongst users of \textit{ggplot2}.\footnote{For example, issue \href{https://github.com/tidyverse/ggplot2/issues/4783}{\#4783} in the \textit{ggplot2} repository is written by a user asking why a theoretical density and samples from a distribution do not line up under transformation---a less attentive user might never have noticed.} Fortunately, \textit{ggdist} does know how to correctly transform densities. It uses a combination of symbolic and (as a fallback) numeric differentiation to calculate derivatives of \textit{ggplot2} scale transformations to adjust densities.\footnote{Specifically, \textit{ggdist} applies R's built-in \texttt{D} function to get the symbolic derivative of the expression defining the scale function and, if that fails, uses \texttt{numDeriv::jacobian}~\textbf{CITE}. In the future, if my pull request \href{https://github.com/r-lib/scales/pull/341}{\#341} to the \textit{scales} package is accepted, determining the derivatives of scale functions will be offloaded into the guts of \textit{ggplot2} and simultaneously be made more reliable.} As a result, we can visualize a log-transformed log-Normal density and get the correct result:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
@@ -700,16 +713,18 @@ ggplot() +
   \end{minipage}
 \hfill\break
 
-This emphasizes the need for uncertainty visualization systems to be \textit{scale-aware}: it is not possible to comprehensively implement uncertainty visualization purely as a data pre-processing step.
+This emphasizes the need for uncertainty visualization systems to be \textit{scale-aware}: it is not possible to comprehensively implement uncertainty visualization purely as a data pre-processing step. This is one example of what Xiaoying Pu~\footnote{Let's be honest, Xiaoying did all the hard work.} and I termed a \textit{tight coupling} of data transformation and visualization specification in a study of expert \textit{ggplot2} users~\cite{pu2023inpractice}: the data processing (calculating the density) is tightly coupled with the visualization spec (the scale transformation), and these must be kept in sync. Moving the specification of densities into the visualization spec itself is one way to ensure this, eliminating a whole class of errors. 
 
-\section{Discussion}
 
-\begin{itemize}
-    \item something about GG giving insights into correctness, possible tasks
-    \item facility for brainstorming
-    \item beyond univariate
-    \item 
-\end{itemize}
+\subsection{Where to go from here}
+
+I would hardly deign to pretend \textit{ggdist} has solved all of uncertainty visualization. In truth, it's stuck to a fairly well-defined corner of it: largely univariate uncertainty visualization. Through \textit{lineribbon}s it does support some multivariate stuff: besides being able to visualize many conditional distributions at once as ribbons, it can visualize joint uncertainty bands in the style of functional boxplots~\textbf{CITE} through the \texttt{curve\_interval} function combined with \texttt{stat\_lineribbon}.\footnote{See examples at \href{https://mjskay.github.io/ggdist/articles/lineribbon.html\#curve-boxplots-aka-lineribbons-with-joint-intervals-or-curvewise-intervals}{the end of the lineribbon vignette}.} Obvious extensions include two-dimensional densities, for which support exists in \textit{ggplot2} but which is not built around the same framework of distributional functions and objects \textit{ggdist} is. Thus, ripe for integration and extension.
+
+Thinking further afield, there are other types of uncertainty visualizations not well-supported in \textit{ggdist}, or which \textit{ggdist}'s abstractions are not particularly relevant to. One obvious example is spaghetti plots~\textbf{CITE}---though, if you already have a joint sample from a distribution of paths in a long-format data frame, \textit{ggplot2} makes it trivial to visualize this. Similarly, animated hypothetical outcome plots (\textsc{hop}s)~\textbf{CITE} are straightforward to construct using \textit{ggplot2} with the \textit{gganimate} package. A more interesting question might be: if one designed a new uncertainty visualization grammar from the ground up to support all of the  visualizations in \textit{ggdist} and \textsc{pgog}, plus static sample-based visualizations like spaghetti plots and animated sample-based \textsc{hop}s, what would it look like? Can a coherent framework bring all of these ideas together, and suggest new ideas too? I am hopeful it can.
+
+\section{Conclusion}
+
+See above.\footnote{This final footnote is my small protest against the inane act of repeating the abstract as the conclusion to one's paper. For an abstract, see the abstract. For a hopeful message about where to go next, see the end of the previous section.}
 
 \section*{Supplemental Materials}
 \label{sec:supplemental_materials}
@@ -717,7 +732,7 @@ This emphasizes the need for uncertainty visualization systems to be \textit{sca
 All supplemental materials are available on Zenodo at \textbf{TODO} and on GitHub at \href{https://github.com/mjskay/ggdist-paper}{github.com/mjskay/ggdist-paper}, released under a CC BY 4.0 license.
 Materials include (1) an RMarkdown file that generates the figures in the paper; (2) generated figure images; and (3) the full source of this paper.
 
-The full source of \textit{ggdist} itself is available on Zenodo at \href{https://doi.org/10.5281/zenodo.3879620}{doi:10.5281/zenodo.3879620} and on GitHub at \href{https://github.com/mjskay/ggdist}{github.com/mjskay/ggdist}, released under a GPL 3.0 license.
+The full source of \textit{ggdist} is on Zenodo (\href{https://doi.org/10.5281/zenodo.3879620}{doi:10.5281/zenodo.3879620}) and on GitHub (\href{https://github.com/mjskay/ggdist}{github.com/mjskay/ggdist}), released under a GPL 3.0 license.
 
 \section*{Figure Credits}
 \label{sec:figure_credits}
@@ -726,11 +741,11 @@ All figures were created by Matthew Kay.
 
 %% if specified like this the section will be ommitted in review mode
 \acknowledgments{%
-I would like to thank various folks who have used, given feedback on, or contributed to \textit{ggdist} over the years (this list is neither exhaustive nor in any particular order): Xiaoying Pu, Alex Kale, Abhraneel Sarma, Fumeng Yang, Matti Vuorre, Dominique Makowski, TJ Mahr, Tim Mastny, Aki Vehtari, Brenton M. Wiernik, Arthur Albuquerque, A. Solomon Kurz, Gabe Bassett, Mitchell O'Hara-Wild, Steve Haroz, Jarrett Byrnes, Dylan H. Morris, Dmytro Perepolkin, C\'edric Scherer,  Isabella Ghement, and Teun van den Brand. This work was supported in part by NSF award IIS-1910431.%
+I would like to thank various folks who have used, given feedback on, or contributed to \textit{ggdist} over the years (this list is neither exhaustive nor in any particular order): Xiaoying Pu, Alex Kale, Abhraneel Sarma, Fumeng Yang, Matti Vuorre, Dominique Makowski, TJ Mahr, Tim Mastny, Aki Vehtari, Brenton M. Wiernik, Arthur Albuquerque, A. Solomon Kurz, Gabe Bassett, Mitchell O'Hara-Wild, Steve Haroz, Jarrett Byrnes, Dylan H. Morris, Dmytro Perepolkin, C\'edric Scherer,  Isabella Ghement, Teun van den Brand, and Jonas Kristoffer Lindeløv. This work was supported in part by NSF award IIS-1910431.%
 }
 
 
-\bibliographystyle{abbrv-doi-hyperref}
+\bibliographystyle{abbrv-doi}
 %\bibliographystyle{abbrv-doi-hyperref-narrow}
 %\bibliographystyle{abbrv-doi}
 %\bibliographystyle{abbrv-doi-narrow}
