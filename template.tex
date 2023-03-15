@@ -631,18 +631,54 @@ Quantile dotplots were designed for uncertainty communication, and depict quanti
 \begin{minipage}{.5\columnwidth}
 
 \begin{align*}
-f_M(x) &\rightarrow \textit{thickness}\\
-\lvert x \rvert < 2 &\rightarrow \textit{fill}\\
-\textsc{stat} &= \mathit{slab}
+M &\rightarrow x_\textsc{dist}\\
+\textit{group} &\rightarrow y\\
+\textsc{stat} &= \mathit{dots}\\
+\textsc{quantiles} &= 100
 \end{align*}
 \end{minipage}%
   \begin{minipage}{.4\columnwidth}
     \centering
-    \includegraphics[width=1.2\columnwidth]{figs/3-slab_rope.pdf}
+    \includegraphics[width=1.2\columnwidth]{figs/3-dots_two.pdf}
   \end{minipage}
 \hfill\break
 
 It is worth noting that \textit{ggplot2} has a \textit{dotplot} geometry already, but that it is often awkward to use: because it uses a bin width specified by the user, there is no guarantee the dotplot will fit inside the available space, often leading to stacks of dots running outside the plot region. By contrast, the \textit{dots} geometry in \textit{ggdist} uses numerical optimization to automatically find a shared bin width across all dotplots in the geometry that ensures they fit in the available space (notice I did not specify bin width above).\footnote{It also allows constraints on minimum and maximum bin width, and has various options for what to do if those constraints may be exceeded, such as compressing the layout so that dots may overlap. Anecdotally, automatic dotplot layout is one of the most popular features of \textit{ggdist}, as it relieves the intense frustration of that endless tweaking cycle to get the dot size right.}
+
+One property of dotplots is the opportunity to encode additional information in the dots themselves. A trivial example in \textit{ggdist} is to use emoji to encode just how you feel about possible effect sizes in the distribution:\footnote{This example was inspired by \href{https://twitter.com/Birdbassador/status/916332327696875520}{a tweet} from Michael Correll suggesting some effect sizes at \textsc{vis} might be best described with a dotplot of poop emojis. I was delighted to find that \textit{ggdist} \href{https://twitter.com/mjskay/status/1361366253424832512}{could replicate that idea}, but have spared the literature a faithful rendering of the poopmoji plot by opting for smiley faces here.}
+
+
+\noindent
+\begin{minipage}{.5\columnwidth}
+
+\begin{align*}
+M &\rightarrow x_\textsc{dist}\\
+x > 0 &\rightarrow \textit{shape}\\
+\textsc{stat} &= \mathit{dots}\\
+\textsc{quantiles} &= 30
+\end{align*}
+\end{minipage}%
+  \begin{minipage}{.4\columnwidth}
+    \centering
+    \includegraphics[width=1.2\columnwidth]{figs/3-dots_emoji.png}
+  \end{minipage}
+\hfill\break
+
+This plot does require specifying more particularly what the \textit{shape} scale function is. Abstractly, if we assume each aesthetic mapping \textit{foo} corresponding to a scale function $s_\textit{foo}$, we might define the scale function for \textit{shape} as:
+
+\[
+s_\textit{shape}(x): x \mapsto \left\{ \begin{array}{ll} \textbf{TODO} & \textrm{if } x\\ \textbf{TODO} & \textrm{if }  
+ \neg x \end{array} \right.
+\]
+
+In \textit{ggplot2} this is:
+
+\begin{centerverbatim}
+scale_shape_manual(
+  values = c("TRUE" = "\textbf{TODO}", "FALSE" = "\textbf{TODO}")
+)  
+\end{centerverbatim}
+
 
 
 \subsection{Further examples}
