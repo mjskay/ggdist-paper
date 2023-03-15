@@ -467,7 +467,7 @@ f_M(x) &\rightarrow \textit{thickness}\\
   \end{minipage}
 \hfill\break
 
-I also include a \textit{pointinterval} with a 95\% interval above (and elsewhere in this section) for reference. The \textit{slab}s have a subscale for \textit{thickness}, which is an orientation-aware aesthetic (if the distributions were mapped onto $y_\textsc{dist}$, \textit{thickness} would act as a width instead of height), with a fixed baseline: values of 0 on the thickness scale always correspond to the base of the slab. This makes it appropriate for both probability densities and $\textsc{cdf}$s, both of which have a natural 0 point. In the above example, the density $f_M(x)$ is mapped onto \textit{thickness}, creating a traditional density plot. Importantly, because the geometries use the same scale, both subscales have the same overall maximum \textit{thickness}, which ensures that the area under both densities is equal.\footnote{This default is, most of the time, what you want, as it preserves the property that each distribution integrates to 1. For exceptions to this rule, \textit{ggdist} provides a \texttt{normalize} option and a \texttt{scale\_thickness\_shared} function which allow finer control over how thickness scales are shared across groups, panels, and geometries.} 
+I also include a \textit{pointinterval} with a median and 95\% interval above (and elsewhere in this section) for reference. The \textit{slab}s have a subscale for \textit{thickness}, which is an orientation-aware aesthetic (if the distributions were mapped onto $y_\textsc{dist}$, \textit{thickness} would act as a width instead of height), with a fixed baseline: values of 0 on the thickness scale always correspond to the base of the slab. This makes it appropriate for both probability densities and $\textsc{cdf}$s, both of which have a natural 0 point. In the above example, the density $f_M(x)$ is mapped onto \textit{thickness}, creating a traditional density plot. Importantly, because the geometries use the same scale, both subscales have the same overall maximum \textit{thickness}, which ensures that the area under both densities is equal.\footnote{This default is, most of the time, what you want, as it preserves the property that each distribution integrates to 1. For exceptions to this rule, \textit{ggdist} provides a \texttt{normalize} option and a \texttt{scale\_thickness\_shared} function which allow finer control over how thickness scales are shared across groups, panels, and geometries.} 
 
 This is the default output of \texttt{stat\_slab()} in \textit{ggdist}, which maps densities onto the \textit{thickness} aesthetic. If desired, the mapping $f_M(x) \rightarrow \textit{thickness}$ can be translated to code in one of two ways:
 
@@ -555,7 +555,7 @@ f_M(x) &\rightarrow \textit{thickness}\\
   \end{minipage}
 \hfill\break
 
-Helske describes these violin-interval plots as ``more challenging to create''; \textit{ggdist} supports them naturally through a combination of its features not \textit{specifically} designed to create these plots. Another variation on violin plots is the \textit{raindrop plot} of Barrowman and Myers~\cite{barrowman2003raindrop}, which maps log-density instead of density onto \textit{thickness} inside a desired interval, say 95\%. Let's combine that with a \textit{pointinterval} (spec for the latter not shown):
+Helske describes these violin-interval plots as ``more challenging to create''; \textit{ggdist} supports them naturally through a combination of its features not \textit{specifically} designed to create these plots. Another variation on violin plots is the \textit{raindrop plot} of Barrowman and Myers~\cite{barrowman2003raindrop}, which maps log-density instead of density onto \textit{thickness} inside a desired interval, say 95\%:
 
 
  \noindent
@@ -582,7 +582,7 @@ stat_slab(side = "both", normalize = "groups")
 
 Where \texttt{normalize = "groups"} is needed to tell the slab to normalize thickness on a per-group basis, as log-density does not have a natural zero point. Without this, the endpoints of the arcs defining the ``raindrops'' may not reach the \textit{thickness} baseline.
 
-Another interesting\footnote{\textsc{aka} weird.}\footnote{Yes, there are a lot of footnotes. No, I don't care.} uncertainty visualization from the literature is Haber and Wilkinson's~\cite{haber1982perceptual} \textit{fuzzygram}, i.e. \textit{fuzzy histogram}. We can generalize it to a \textit{fuzzy bar chart}. This chart type has what I would call a compelling \textit{generative story}: an explanation you can give for how the uncertainty encoding in the chart arises based on some generative process. Imagine we want to add uncertainty to a bar chart, and we have a distribution for the uncertainty in the value encoded in each bar. Now say we sample a large number of semi-transparent bar charts from these distributions, and overlay them all on top of each other. As the number of charts approaches $\infty$ and the opacity of any given chart goes to 0, the stack of overlapping bars for each value will begin to resemble the complementary \textsc{cdf}, $1 - F(x)$, of that distribution.\footnote{Assuming additive blending and opacities that sum to 1.} That insight leads to the following encoding (with a \textit{pointinterval} overlaid for reference):
+Another interesting\footnote{\textsc{aka} weird.}\footnote{Yes, there are a lot of footnotes. No, I don't care.} uncertainty visualization from the literature is Haber and Wilkinson's~\cite{haber1982perceptual} \textit{fuzzygram}, i.e. \textit{fuzzy histogram}. We can generalize it to a \textit{fuzzy bar chart}. This chart type has what I would call a compelling \textit{generative story}: an explanation you can give for how the uncertainty encoding in the chart arises based on some generative process. Imagine we want to add uncertainty to a bar chart, and we have a distribution for the uncertainty in the value encoded in each bar. Now say we sample a large number of semi-transparent bar charts from these distributions, and overlay them all on top of each other. As the number of charts approaches $\infty$ and the opacity of any given chart goes to 0, the stack of overlapping bars for each value will begin to resemble the complementary \textsc{cdf}, $1 - F(x)$, of that distribution.\footnote{Assuming additive blending and opacities that sum to 1.} That insight leads to the following encoding:
 
  \noindent
 \begin{minipage}{.5\columnwidth}
@@ -623,6 +623,28 @@ Here, $\Pr(\lvert x \rvert < 2)$---the probability the value is in a \textsc{rop
 
 \textbf{TODO} Something about dotplots, particularly quantile dotplots, but not too much. Allude to layout algorithms and some of the annoying bits of making dotplots without them.
 
+In this modern climate, where every other uncertainty visualization paper is about \textit{frequency framing} or \textit{discrete outcome} representations---spaghetti plots~\cite{cox2013visualizing,liu2018visualizing} hypothetical outcome plots~\cite{hullman2015hypothetical,kale2018hypothetical}, quantile dotplots~\cite{kay2016ish,fernandes2018uncertainty} and the like---I would be remiss to write a whole toolkit for uncertainty visualization that can't make one measly discrete outcome uncertainty visualization.\footnote{Plus it would be a little silly of me to develop a whole-ass visualization toolkit that can't at least make quantile dotplots, since I came up with them in the first place~\cite{kay2016ish}.} The natural counterpart to the continuous encoding of the \textit{slab} geometry is a\textit{ggdist}'s \textit{dots} geometry, which is designed to create Wilkinson dotplots~\cite{wilkinson1999dot} (on raw data)\footnote{And minor variations thereof, like \textit{beeswarm} plots.} and quantile dotplots.
+
+Quantile dotplots were designed for uncertainty communication, and depict quantiles of a continuous distribution using a dotplot, to help the viewer reason about that distribution as a set of discrete possible outcomes~\cite{kay2016ish}. Continuing our example from the \textit{slab} geometries, here is two quantile dotplots using 100 dots each:
+
+\noindent
+\begin{minipage}{.5\columnwidth}
+
+\begin{align*}
+f_M(x) &\rightarrow \textit{thickness}\\
+\lvert x \rvert < 2 &\rightarrow \textit{fill}\\
+\textsc{stat} &= \mathit{slab}
+\end{align*}
+\end{minipage}%
+  \begin{minipage}{.4\columnwidth}
+    \centering
+    \includegraphics[width=1.2\columnwidth]{figs/3-slab_rope.pdf}
+  \end{minipage}
+\hfill\break
+
+It is worth noting that \textit{ggplot2} has a \textit{dotplot} geometry already, but that it is often awkward to use: because it uses a bin width specified by the user, there is no guarantee the dotplot will fit inside the available space, often leading to stacks of dots running outside the plot region. By contrast, the \textit{dots} geometry in \textit{ggdist} uses numerical optimization to automatically find a shared bin width across all dotplots in the geometry that ensures they fit in the available space (notice I did not specify bin width above).\footnote{It also allows constraints on minimum and maximum bin width, and has various options for what to do if those constraints may be exceeded, such as compressing the layout so that dots may overlap. Anecdotally, automatic dotplot layout is one of the most popular features of \textit{ggdist}, as it relieves the intense frustration of that endless tweaking cycle to get the dot size right.}
+
+
 \subsection{Further examples}
 
 My hope in the preceding sections was to whet your appetite for the possibilities of an uncertainty visualization grammar grounded in distributions. I have attempted to give a taste for why ggdist is structured the way it is, its underlying formalism, and how it extends the grammar of graphics in a principled way to support fluid specification of a variety of uncertainty visualizations. What I've shown only scratches the surface of what \textit{ggdist} can do: the interested reader (hopefully you!) can check out the vignettes in the \href{https://mjskay.github.io/ggdist/}{\textit{ggdist} documentation}, which include a slew of examples not covered here. The \href{https://mjskay.github.io/tidybayes/}{\textit{tidybayes} documentation} is also worth checking out, as it includes more examples of the use of \textit{ggdist} with Bayesian models. I am also continually surprised by what \textit{ggdist} users come up with
@@ -643,6 +665,10 @@ A key insight from working on both \textsc{pgog} and \textit{ggdist} is that bri
 \textbf{TODO} rainclouds, whwere to draw the line on composite geoms / shortcuts. histograms as slab types or as density estimators. maybe a section on how annoying KDEs are? --- include omething about seeing incorrect vis in the wild, finding good defaults, etc (see also: default points and intervals as median/qi, move to a default KDE that estimates bounds and uses bounded estimator, etc).
 
 Maybe something about the various bits of machinery for distributions: discrete/not, determining support, determining bounds when plotting automatically, etc.
+
+\subsection{faceting versus thickness}
+
+faceting too awkward, needing thickness for dodging, etc.
 
 \subsection{Uncertainty is difficult to factor out into data pre-processing}
 \label{sec:jacobians}
