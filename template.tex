@@ -254,8 +254,8 @@ For example, a median and $\gamma\%$ quantile interval could be defined generica
 \begin{minipage}{.5\columnwidth}
 \begin{align*}
 \operatorname{median}(M) &\rightarrow x\\
-F_M^{-1}\left(\frac{1 - \gamma}{2}\right) &\rightarrow x_\textsc{min}\\
-F_M^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
+F_M^{-1}\left[\frac{1 - \gamma}{2}\right] &\rightarrow x_\textsc{min}\\
+F_M^{-1}\left[\frac{1 + \gamma}{2}\right] &\rightarrow x_\textsc{max}\\
 \textsc{geom} &= \mathit{pointinterval}
 \end{align*}
 \end{minipage}%
@@ -272,8 +272,8 @@ If $M$ is a probability distribution, this is a Bayesian \textit{credible }inter
 
 \begin{align*}
 \operatorname{median}(M) &\rightarrow x\\
-F_M^{-1}\left(\frac{1 - \gamma}{2}\right) &\rightarrow x_\textsc{min}\\
-F_M^{-1}\left(\frac{1 + \gamma}{2}\right) &\rightarrow x_\textsc{max}\\
+F_M^{-1}\left[\frac{1 - \gamma}{2}\right] &\rightarrow x_\textsc{min}\\
+F_M^{-1}\left[\frac{1 + \gamma}{2}\right] &\rightarrow x_\textsc{max}\\
 -\gamma &\rightarrow \mathit{linewidth}\\
 \textsc{geom} &= \mathit{pointinterval}\\
 \gamma &\in \{0.66, 0.95\}
@@ -467,7 +467,7 @@ f_M(x) &\rightarrow \textit{thickness}\\
   \end{minipage}
 \hfill\break
 
-Here, the \textit{slab}s have a subscale for \textit{thickness}, which is an orientation-aware aesthetic (if the distributions were mapped onto $y_\textsc{dist}$, \textit{thickness} would act as a width instead of height), with a fixed baseline: values of 0 on the thickness scale always correspond to the base of the slab. This makes it appropriate for both probability densities and $\textsc{cdf}$s, both of which have a natural 0 point. In the above example, the density $f_M(x)$ is mapped onto \textit{thickness}, creating a traditional density plot. Importantly, because the geometries use the same scale, both subscales have the same overall maximum \textit{thickness}, which ensures that the area under both densities is equal.\footnote{This default is, most of the time, what you want, as it preserves the property that each distribution integrates to 1. For exceptions to this rule, \textit{ggdist} provides a \texttt{normalize} option and a \texttt{scale\_thickness\_shared} function which allow finer control over how thickness scales are shared across groups, panels, and geometries.} 
+I also include a \textit{pointinterval} with a 95\% interval above (and elsewhere in this section) for reference. The \textit{slab}s have a subscale for \textit{thickness}, which is an orientation-aware aesthetic (if the distributions were mapped onto $y_\textsc{dist}$, \textit{thickness} would act as a width instead of height), with a fixed baseline: values of 0 on the thickness scale always correspond to the base of the slab. This makes it appropriate for both probability densities and $\textsc{cdf}$s, both of which have a natural 0 point. In the above example, the density $f_M(x)$ is mapped onto \textit{thickness}, creating a traditional density plot. Importantly, because the geometries use the same scale, both subscales have the same overall maximum \textit{thickness}, which ensures that the area under both densities is equal.\footnote{This default is, most of the time, what you want, as it preserves the property that each distribution integrates to 1. For exceptions to this rule, \textit{ggdist} provides a \texttt{normalize} option and a \texttt{scale\_thickness\_shared} function which allow finer control over how thickness scales are shared across groups, panels, and geometries.} 
 
 This is the default output of \texttt{stat\_slab()} in \textit{ggdist}, which maps densities onto the \textit{thickness} aesthetic. If desired, the mapping $f_M(x) \rightarrow \textit{thickness}$ can be translated to code in one of two ways:
 
