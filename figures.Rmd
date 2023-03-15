@@ -528,16 +528,17 @@ ggsave("figs/3-dots_two.pdf", device = cairo_pdf)
 
 ```{r dots_emoji, fig.width = 2.5, fig.height = 2}
 p = two_a_zero |>
-  ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
-  geom_vline(xintercept = 0, color = "gray85", linewidth = 0.25) +
-  stat_dots(aes(shape = after_stat(x > 0)), quantiles = 30, stackratio = 1.1, dotsize = 0.9) +
-  scale_x_continuous(breaks = seq(-2, 8, by = 2), limits = c(-2.75, 8.9)) +
-  scale_y_discrete(expand = expansion(0.15)) +
+  filter(group == "b") |>
+  ggplot(aes(xdist = dist_student_t(nu, mu, sigma))) +
+  # geom_vline(xintercept = 0, color = "gray85", linewidth = 0.25) +
+  stat_dots(aes(shape = after_stat(x > 0)), quantiles = 50, stackratio = 1.1, dotsize = 0.9) +
+  scale_x_continuous(breaks = seq(-4, 4, by = 2), limits = c(-4, 4)) +
+  scale_y_continuous(breaks = NULL, expand = expansion(0.01)) +
   scale_shape_manual(
     values = c("FALSE" = "😧", "TRUE" = "🙂"), 
     guide = guide_legend(reverse = TRUE, title.hjust = 0.92, override.aes = list(linewidth = 4))
   ) +
-  labs(x = NULL) +
+  labs(x = NULL, y = NULL) +
   theme(legend.position = c(0.85,0.8)) 
 
 p
