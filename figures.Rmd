@@ -23,6 +23,8 @@ library(brms)
 library(posterior)           # rvar
 library(colorspace)          # continuous color palettes
 library(patchwork)
+library(ggtext)              # element_textbox_simple
+library(ragg)                # agg_png
 ```
 
 And this ggplot theme, based on `theme_ggdist()`, using the Source Sans Pro font (in the `fonts/` folder):
@@ -83,6 +85,86 @@ And color palettes:
 sequential_hcl(n = 7, h = 245, c = c(50, 75, NA), l = c(20, 100), power = 0.8, register = "Blue-White")
 ```
 
+
+## Teaser
+
+```{r slabinterval_teaser, echo=FALSE, fig.height=4, fig.width=4}
+dists_df = tibble(
+  # enforce order
+  geom = rev(c(
+    "halfeye", 
+    "eye",
+    "gradientinterval", 
+    "ccdfinterval", 
+    "cdfinterval",
+    "interval",
+    "pointinterval",
+    "slab",
+    "histinterval"
+    )) %>%
+    factor(., levels = .),
+  dist = dist_normal(4, 1)
+)
+
+hist_df = tibble(
+  geom = "histinterval",
+  x = qnorm(ppoints(1000), 4, 1)
+)
+
+dists_df_ = function(geom_) filter(dists_df, geom == geom_)
+
+
+# FAMILY HEADER
+
+dists_xlim = c(0,8)
+
+header_theme = theme(
+  plot.title = element_textbox_simple(size = 10, lineheight = 1.1, margin = margin(5,0,5,0)),
+  axis.line.x = element_blank(),
+  plot.background = element_rect(fill = "gray95"),
+  panel.background = element_blank(),
+  plot.margin = unit(c(5.5, 0, 5.5, 5.5), "points")
+)
+
+dists_header_plot = dists_df_("halfeye") %>%
+  mutate(geom = "slabinterval") %>%
+  ggplot(aes(y = geom, xdist = dist)) +
+  stat_slabinterval(position = position_nudge(y = - 0.2)) +
+  scale_x_continuous(limits = dists_xlim, expand = c(0,0), breaks = NULL) +
+  scale_y_discrete(expand = c(0.4,0)) +
+  labs(
+    title = "**The *slabinterval* family**<br>
+    Combinations of *slabs*, *points*, and *intervals*",
+    x = NULL,
+    y = NULL
+  ) +
+  header_theme
+
+# SHORTCUT STATS
+
+dists_plot = dists_df %>%
+  ggplot(aes(y = geom, xdist = dist)) +
+  geom_blank() + # ensures order
+  stat_eye(data = dists_df_("eye")) +
+  stat_halfeye(data = dists_df_("halfeye"), position = position_nudge(y = -0.2)) +
+  stat_gradientinterval(data = dists_df_("gradientinterval"), scale = .5, fill_type = "gradient") +
+  stat_ccdfinterval(data = dists_df_("ccdfinterval"), scale = .5) +
+  stat_cdfinterval(data = dists_df_("cdfinterval"), scale = .5) +
+  stat_interval(data = dists_df_("interval"), color = "gray65", alpha = 1/3, linewidth = 10,
+    position = position_nudge(y = -.1)) +
+  stat_pointinterval(data = dists_df_("pointinterval")) +
+  stat_slab(data = dists_df_("slab"), position = position_nudge(y = - 0.2)) +
+  stat_histinterval(aes(x = x, xdist = NULL), data = hist_df, position = position_nudge(y = - 0.25)) +
+  scale_slab_alpha_continuous(guide = "none") +
+  scale_x_continuous(breaks = NULL, limits = dists_xlim, expand = c(0,0)) +
+  labs(
+    x = NULL,
+    y = NULL
+  )
+
+slabinterval_teaser = (dists_header_plot / dists_plot) + plot_layout(heights = c(1.2, 8))
+slabinterval_teaser
+```
 
 
 ## Setting the stage
@@ -429,7 +511,43 @@ p
 ggsave("figs/3-slab_rope.pdf", device = cairo_pdf)
 ```
 
-## Jacobians
+### Dotplots
+
+```{r dots_two, fig.width = 2.5, fig.height = 2}
+p = two_a_zero |>
+  ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
+  stat_dots(quantiles = 100) +
+  scale_x_continuous(breaks = seq(-2, 14, by = 2)) +
+  scale_y_discrete(expand = expansion(0.15)) +
+  labs(x = NULL)
+
+p
+ggsave("figs/3-dots_two.pdf", device = cairo_pdf)
+```
+
+
+```{r dots_emoji, fig.width = 2.5, fig.height = 2}
+p = two_a_zero |>
+  ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
+  geom_vline(xintercept = 0, color = "gray85", linewidth = 0.25) +
+  stat_dots(aes(shape = after_stat(x > 0)), quantiles = 30, stackratio = 1.1, dotsize = 0.9) +
+  scale_x_continuous(breaks = seq(-2, 8, by = 2), limits = c(-2.75, 8.9)) +
+  scale_y_discrete(expand = expansion(0.15)) +
+  scale_shape_manual(
+    values = c("FALSE" = "😧", "TRUE" = "🙂"), 
+    guide = guide_legend(reverse = TRUE, title.hjust = 0.92, override.aes = list(linewidth = 4))
+  ) +
+  labs(x = NULL) +
+  theme(legend.position = c(0.85,0.8)) 
+
+p
+ggsave("figs/3-dots_emoji.png", device = agg_png, dpi = 900)
+```
+
+
+## Lessons learned
+
+### Jacobians
 
 ```{r 3-jacobian-lognorm, fig.width=2.5, fig.height = 1.5}
 p = ggplot() +
