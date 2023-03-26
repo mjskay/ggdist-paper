@@ -55,16 +55,17 @@
 
 %% Abstract section.
 \abstract{%
-  \lipsum[1] % filler text. Replace with your abstract.
+  The grammar of graphics is ubiquitous, providing the foundation for a variety of popular visualization tools and toolkits. Yet support for uncertainty visualization in the grammar graphics—beyond simple variations of error bars, uncertainty bands, and density plots—remains scarce. Research in uncertainty visualization has developed a rich variety of improved uncertainty visualizations, most of which are difficult to create in existing grammar of graphics implementations. \textit{ggdist}, an extension to the popular \textit{ggplot2} grammar of graphics implementation, is an attempt to rectify this situation. \textit{ggdist} unifies a variety of uncertainty visualization types through the lens of distributional visualization, allowing functions of distributions to be mapped to directly to visual channels (aesthetics) of geometries, making it straightforward to express a variety of (sometimes weird!) uncertainty visualization types. This distributional lens also offers a way to unify Bayesian and frequentist uncertainty visualization by formalizing the latter with the help of confidence distributions. In this paper, I offer a description of this uncertainty visualization paradigm, and a retrospective and lessons learned from its development and adoption: \textit{ggdist} has existed in some form for about six years (originally as part of the \textit{tidybayes} R package for post-processing Bayesian models), and it has changed substantially over that time, with several rewrites and API re-organizations as it changed based on user feedback and expanded to cover increasing varieties of uncertainty visualization types. Ultimately, given the huge expressive power of the grammar of graphics and the popularity of tools built on it, I hope a catalog of my experiences with \textit{ggdist} might provide a catalyst for further improvements to formalizations and implementations of uncertainty visualization across grammar of graphics ecosystems. % filler text. Replace with your abstract.
   %
   %% We recommend that you link to your supplemental material here in the abstract, as well
   %% as in the Supplemental Materials section at the end.
+  
   A free copy of this paper and all supplemental materials are available at \url{https://OSF.IO/2NBSG}.
 }
 
 %% Keywords that describe your work. Will show as 'Index Terms' in journal
 %% please capitalize first letter and insert punctuation after last keyword
-\keywords{Uncertainty visualization, distributions, grammar of graphics}
+\keywords{Uncertainty visualization, probability distributions, confidence distributions, grammar of graphics}
 
 %% A teaser figure can be included as follows
 \teaser{
@@ -381,6 +382,8 @@ ggplot(data) +
   stat_pointinterval()
 \end{centerverbatim}
 
+Thus the code matches us closely to the abstract notation.
+
 \subsection{Ribbons}
 
 Once we have \textit{pointinterval} representations, it is straightforward to develop uncertainty band representations by generalizing points to lines and intervals to ribbons---thus, \textit{lineribbon}. Imagine a regression that models car miles per gallon based on weight (the details of the function $g$ are not important):
@@ -517,7 +520,7 @@ In \textit{ggdist} this function is either:
     \item    \texttt{-pmax(abs(2*!!Pr\_(X <= x) - 1), .95)}, using the probability expression mini-\textsc{dsl}.
 \end{itemize}
 
-Thus, \textit{ggdist} can create this particularly weird uncertainty visualization without breaking the bonds of its core abstraction. But let's get \textit{weirder}: in 2021, Helske et al~\cite{helske2021can}, inspired by Correll and Gleicher, proposed combining this gradient tail with a violin plot. We can do that by adding back in the density-to-thickness mapping, and use the \textsc{side} parameter, which specifies if the slab should be drawn on the \textit{top} side (default), \textit{bottom} side, or \textit{both}. I'll also adjust the tails to fade outside the 85\% interval, since otherwise the fading is hard to see in the skinny tails of the violin:
+Thus, \textit{ggdist} can create this particularly weird uncertainty visualization without breaking the bonds of its core abstraction. \textbf{TODO: mention consonance curves}  But let's get \textit{weirder}: in 2021, Helske et al~\cite{helske2021can}, inspired by Correll and Gleicher, proposed combining this gradient tail with a violin plot. We can do that by adding back in the density-to-thickness mapping, and use the \textsc{side} parameter, which specifies if the slab should be drawn on the \textit{top} side (default), \textit{bottom} side, or \textit{both}. I'll also adjust the tails to fade outside the 85\% interval, since otherwise the fading is hard to see in the skinny tails of the violin:
 
  \noindent
 \begin{minipage}{.5\columnwidth}
@@ -598,7 +601,7 @@ Another interesting\footnote{\textsc{aka} weird.}\footnote{Yes, there are a lot 
   \end{minipage}
 \hfill\break
 
-I would describe this chart type as theoretically interesting but interpretationally problematic. Anecdotally, without the overlaid reference point and interval, folks I show this to often do not correctly identify the mean of the distribution, believing the darker parts of the bar are more likely (a not unreasonable misinterpretation).\footnote{I don't know if this is an example of within-the-bar bias~\cite{newman2012bar} or not.} On the other hand, I do like the idea of \textit{generative stories} in uncertainty visualization; for example, I've used Plinko boards to depict uncertainty in election forecasts~\textbf{CITE}, which try to capitalize on a physical process---one that might intuitively\footnote{As this is an uncertainty vis paper, I am legally required to use ``intuitive'' at least once without defining it.} feel random to people---to depict uncertainty through a form of \textit{sedimentation}~\textbf{CITE}.
+I would describe this chart type as theoretically interesting but interpretationally problematic. Anecdotally, without the overlaid reference point and interval, folks I show this to often do not correctly identify the mean of the distribution, believing the darker parts of the bar are more likely (a not unreasonable misinterpretation).\footnote{I don't know if this is an example of within-the-bar bias~\cite{newman2012bar} or not.} On the other hand, I do like the idea of \textit{generative stories} in uncertainty visualization; for example, I've used Plinko boards to depict uncertainty in election forecasts~\textbf{CITE}, which try to capitalize on a physical process---one that might intuitively\footnote{As this is an uncertainty visualization paper, I am professionally obligated to use ``intuitive'' at least once without defining it.} feel random to people---to depict uncertainty through a form of \textit{sedimentation}~\textbf{CITE}.
 
 Another advantage to being able to map arbitrary data values onto slab aesthetics is that we can map the results of logical conditions onto those aesthetics. A common procedure in the Bayesian estimation community is to use regions of practical equivalence (\textsc{rope}s)~\cite{kruschke2018rejecting}. Say, for example, you are interested in whether an estimate is ``practically'' equal to 0; you would define a \textsc{rope} around 0 of $\pm$ some small effect size within which you would consider the value so close to 0 it is effectively indistinguishable from it. Then you can ask questions like, what is the probability the value is practically equivalent to 0? We can visualize this probability by highlighting the \textsc{rope} on a density:
 
@@ -621,9 +624,7 @@ Here, $\Pr(\lvert x \rvert < 2)$---the probability the value is in a \textsc{rop
 
 \subsection{Dotplots}
 
-\textbf{TODO} Something about dotplots, particularly quantile dotplots, but not too much. Allude to layout algorithms and some of the annoying bits of making dotplots without them.
-
-In this modern climate, where every other uncertainty visualization paper is about \textit{frequency framing} or \textit{discrete outcome} representations---spaghetti plots~\cite{cox2013visualizing,liu2018visualizing} hypothetical outcome plots~\cite{hullman2015hypothetical,kale2018hypothetical}, quantile dotplots~\cite{kay2016ish,fernandes2018uncertainty} and the like---I would be remiss to write a whole toolkit for uncertainty visualization that can't make one measly discrete outcome uncertainty visualization.\footnote{Plus it would be a little silly of me to develop a whole-ass visualization toolkit that can't at least make quantile dotplots, since I came up with them in the first place~\cite{kay2016ish}.} The natural counterpart to the continuous encoding of the \textit{slab} geometry is a\textit{ggdist}'s \textit{dots} geometry, which is designed to create Wilkinson dotplots~\cite{wilkinson1999dot} (on raw data)\footnote{And minor variations thereof, like \textit{beeswarm} plots.} and quantile dotplots.
+These days, when every other uncertainty visualization paper is about \textit{frequency framing} or \textit{discrete outcome} representations---spaghetti plots~\cite{cox2013visualizing,liu2018visualizing} hypothetical outcome plots~\cite{hullman2015hypothetical,kale2018hypothetical}, quantile dotplots~\cite{kay2016ish,fernandes2018uncertainty} and the like---I would be remiss to write a whole toolkit for uncertainty visualization that can't make one measly discrete outcome uncertainty visualization.\footnote{Plus it would be a little silly of me to develop a whole-ass visualization toolkit that can't at least make quantile dotplots, since I came up with them in the first place~\cite{kay2016ish}.} The natural counterpart to the continuous encoding of the \textit{slab} geometry is a\textit{ggdist}'s \textit{dots} geometry, which is designed to create Wilkinson dotplots~\cite{wilkinson1999dot} (on raw data)\footnote{And minor variations thereof, like \textit{beeswarm} plots.} and quantile dotplots.
 
 Quantile dotplots were designed for uncertainty communication, and depict quantiles of a continuous distribution using a dotplot, to help the viewer reason about that distribution as a set of discrete possible outcomes~\cite{kay2016ish}. Continuing our example from the \textit{slab} geometries, here is two quantile dotplots using 100 dots each:
 
@@ -645,7 +646,7 @@ M &\rightarrow x_\textsc{dist}\\
 
 It is worth noting that \textit{ggplot2} has a \textit{dotplot} geometry already, but that it is often awkward to use: because it uses a bin width specified by the user, there is no guarantee the dotplot will fit inside the available space, often leading to stacks of dots running outside the plot region. By contrast, the \textit{dots} geometry in \textit{ggdist} uses numerical optimization to automatically find a shared bin width across all dotplots in the geometry that ensures they fit in the available space (notice I did not specify bin width above).\footnote{It also allows constraints on minimum and maximum bin width, and has various options for what to do if those constraints may be exceeded, such as compressing the layout so that dots may overlap. Anecdotally, automatic dotplot layout is one of the most popular features of \textit{ggdist}, as it relieves the intense frustration of that endless tweaking cycle to get the dot size right.}
 
-One property of dotplots is the opportunity to encode additional information in the dots themselves. A trivial example in \textit{ggdist} is to use emoji to encode just how you feel about possible effect sizes in the distribution:\footnote{This example was inspired by \href{https://twitter.com/Birdbassador/status/916332327696875520}{a tweet} from Michael Correll suggesting some effect sizes at \textsc{vis} might be best described with a dotplot of poop emojis. I was delighted to find that \textit{ggdist} \href{https://twitter.com/mjskay/status/1361366253424832512}{could replicate that idea}, but have spared the literature a faithful rendering of the poopmoji plot by opting for smiley faces here.}
+One property of dotplots is the opportunity to encode additional information in the dots themselves. A trivial example in \textit{ggdist} is to use emoji to encode just how you feel about possible effect sizes in the distribution:\footnote{This example was inspired by \href{https://twitter.com/Birdbassador/status/916332327696875520}{a tweet} from Michael Correll suggesting effect sizes at \textsc{vis} might be best described with a dotplot of poop emojis. I was delighted to find that \textit{ggdist} \href{https://twitter.com/mjskay/status/1361366253424832512}{could replicate that idea}, but have spared the literature a faithful rendering of the poopmoji plot by using smiley faces here.}
 
 
 \noindent
@@ -655,7 +656,7 @@ One property of dotplots is the opportunity to encode additional information in 
 M &\rightarrow x_\textsc{dist}\\
 x > 0 &\rightarrow \textit{shape}\\
 \textsc{stat} &= \mathit{dots}\\
-\textsc{quantiles} &= 30
+\textsc{quantiles} &= 50
 \end{align*}
 \end{minipage}%
   \begin{minipage}{.4\columnwidth}
@@ -664,7 +665,7 @@ x > 0 &\rightarrow \textit{shape}\\
   \end{minipage}
 \hfill\break
 
-This plot does require specifying more particularly what the \textit{shape} scale function is. Abstractly, if we assume each aesthetic mapping \textit{foo} corresponding to a scale function $s_\textit{foo}$, we might define the scale function for \textit{shape} as:
+This plot does require specifying more particularly what the \textit{shape} scale function is. Abstractly, if we assume each aesthetic mapping \textit{foo} has a scale function $s_\textit{foo}$, we might define the scale function for \textit{shape} as:
 
 \[
 s_\textit{shape}(x): x \mapsto \left\{ \begin{array}{ll} \textbf{TODO} & \textrm{if } x\\ \textbf{TODO} & \textrm{if }  
@@ -679,22 +680,55 @@ scale_shape_manual(
 )  
 \end{centerverbatim}
 
+This may seem manifestly silly, but there's something to the idea of making discrete outcomes more concrete or at least memorable through graphic depictions, whether it be with emoji or other icons~\textbf{CITE}. Since arbitrary fonts can be used with \textit{ggplot2} shapes, it is one avenue to creating more expressive dotplots: for example, I have used Alberto Cairo's \textit{Wee People} font~\textbf{CITE} to create dotplots with anthropomorphic icons.~\textbf{CITE}
 
+\subsection{Combinations}
+
+\textbf{TODO} USGS, Cedric's slab+interval, rainclouds, logit dotplots (plus mention that's in \textit{see}).
 
 \subsection{Further examples}
 
-My hope in the preceding sections was to whet your appetite for the possibilities of an uncertainty visualization grammar grounded in distributions. I have attempted to give a taste for why ggdist is structured the way it is, its underlying formalism, and how it extends the grammar of graphics in a principled way to support fluid specification of a variety of uncertainty visualizations. What I've shown only scratches the surface of what \textit{ggdist} can do: the interested reader (hopefully you!) can check out the vignettes in the \href{https://mjskay.github.io/ggdist/}{\textit{ggdist} documentation}, which include a slew of examples not covered here. The \href{https://mjskay.github.io/tidybayes/}{\textit{tidybayes} documentation} is also worth checking out, as it includes more examples of the use of \textit{ggdist} with Bayesian models. I am also continually surprised by what \textit{ggdist} users come up with
+My hope in the preceding sections was to whet your appetite for the possibilities of an uncertainty visualization grammar grounded in distributions. I have attempted to give a taste for why ggdist is structured the way it is, its underlying formalism, and how it extends the grammar of graphics in a principled way to support fluid specification of a variety of uncertainty visualizations. What I've shown only scratches the surface of what \textit{ggdist} can do: the interested reader (hopefully you!) can check out the vignettes in the \href{https://mjskay.github.io/ggdist/}{\textit{ggdist} documentation}, which include a slew of examples not covered here. The \href{https://mjskay.github.io/tidybayes/}{\textit{tidybayes} documentation} is also worth checking out, as it includes more examples of the use of \textit{ggdist} with Bayesian models.
+
+\section{Use in the wild}
+\label{sec:use-in-the-wild}
+
+\textbf{TODO} maybe: use in Cedric scherer tutorials, USGS, tidytuesday,   .... ?
+
+I sometimes wonder if the best way to validate visualization ideas is to deploy them into the world and wait to see what happens (as Munzner puts it---to see what users do of their own accord~\textbf{CITE}). Yet, given the vagaries of research project timelines, most systems in \textsc{vis} do not have this opportunity---understandably so, lest we wait 10 years to graduate a PhD student. While there are examples of wildly successful systems that came out of visualization research (e.g. \textit{d3}~\textbf{CITE}, \textit{Vega-lite}~\textbf{CITE}), few systems have both the generality and reach of those exemplars. \textit{ggdist} falls somewhere in the middle: it has been deployed for several years and enjoys a modest following. This gives me the opportunity to look at some coarse---but naturalistic---data on usage.
+
+\textit{ggdist} currently enjoys a modest 14,000 downloads per month from \textsc{cran}~\textbf{CITE} (up from just a few thousand on original launch in 2020, piggy-backing on \textit{tidybayes}' already-established community at the time). Per Google Scholar, it has been cited 46 times (and \textit{tidybayes} 236 times).\footnote{These are both citations of the software itself: neither package has had a paper written about it---yet.} Its Github project has been starred \textasciitilde 620 times, putting it in the company of popular packages like \textit{cowplot} (\textasciitilde 640), \textit{ggalt} (\textasciitilde 630), and \textit{ggtext} (\textasciitilde 600) in the \href{https://exts.ggplot2.tidyverse.org/gallery/}{\textit{ggplot2} extension gallery}. On Github, \textit{ggdist} has 169 issues in its issue tracker, not counting the 305 issues in \textit{tidybayes} (of which many issues prior to \textit{ggdist} splitting from \textit{tidybayes }were \textit{ggdist}-related). Issues especially can be a sign of user engagement, because projects without broader engagement will have issues opened only by the author. To better understand that engagement, I exported all issues from \textit{ggdist} (see \href{https://github.com/mjskay/ggdist/issues}{Github} or the supplement) and read back through them, engaging in a light tagging process based on what I recalled about those issues.
+
+Of the 169 issues on Github, 79 (47\%) were opened by someone other than me; there were 45 unique authors, excluding me. A further 16 issues were opened by me in direct response to some user need, either flowing from a comment on another issue or from a conversation I had with a user on another platform, often Twitter.~\footnote{I spend possibly too much time on \texttt{\#rstats} Twitter engaging with data scientists around visualization problems.} Thus, the majority of issues on \textit{ggdist}'s tracker stem from user engagement with the package, and from a variety of users. I roughly categorized the types of issues (with some overlap) as follows:
+
+\begin{itemize}
+    \item 38\%: A feature request or an issue that (did or would) result in a new feature.
+    \item 20\%: A user asking for help, usually with a particular plot they are trying to create.
+    \item 17\%: A bug.
+    \item 16\%: Internal issues, such as code refactoring, cleanup, or textsc{todo}-tracking.
+    \item 9\%: Documentation.
+\end{itemize}
+
+Currently, 34 issues (20\%) remain open; only one of these is a bug (recently-reported). 
+I have been fortunate to get a wide variety of engagement from users which has lead to substantive improvement to \textit{ggdist}. It is hard for me to summarize that engagement over all of these issues, but I'll highlight two instances that have had a salient impact on the overall design of \textit{ggdist}, and which have some useful lessons for uncertainty visualization in the grammar of graphics.
+
+First, \href{https://github.com/mjskay/ggdist/issues/83}{issue \#83} involves an extensive discussion about how to refactor \textit{ggdist} to merge two classes of \textit{stat}s. Older versions of \textit{ggdist} distinguished between \textit{stat}s designed to summarize distributions represented as vectors of samples (mapped onto \textit{x} or \textit{y}) and those designed to represent distribution objects (mapped onto a now-superceded \textit{dist} aesthetic). My experience answering user issues led me to conclude that this distinction was confusing, so I opened this issue as an attempt to find a better solution. Two expert users joined in the discussion, and together we considered a variety of options, including creating a new \textit{distribution} subtype of \textit{x} and \textit{y} scales (the way that continuous values, discrete values, dates, and times are handled), or creating new aesthetics, like $x_\textsc{dist}$ and $y_\textsc{dist}$. We weighed pros and cons, and I prototyped an implementation of the former, realizing some shortcomings: distributions cannot easily be treated as subtypes of positional scales like continuous or discrete variables are, because distributions themselves have subtypes (like being continuous or discrete). In addition, other non-distribution variables must be able to share the same positional scale as the distributional variables (so, e.g., an \textit{x} scale cannot be given a \textit{continuous distribution} subtype, it must have a \textit{continuous} subtype). After further conversation, I settled on the $x_\textsc{dist}$ and $y_\textsc{dist}$ design, which makes it easy to intermix distributional objects with non-distributional objects along the same positional scale. This has proven to be a good choice, as I have noticed users struggle less with the new design: previously, the $\textit{dist}$ aesthetic would implicitly be mapped to the relevant positional scale depending on the orientation of the geometry, and this lead to confusion when this mapping was not as a user intended.
+
+Second, \href{https://github.com/mjskay/ggdist/issues/19}{issue \#19}---to automatically detect discrete theoretical distributions and render them correctly as histograms---had been a longstanding wishlist issue. About 9 months after I opened it, prompted by a conversation on Twitter, a \textit{ggdist} user posted some examples of plots they might be able to create if the issue were resolved. This lead to a productive back-and-forth around the design of discrete distribution displays, and resulted in a feature in \textit{ggdist} whereby histograms of discrete theoretical distributions are treated as a type of density plot: a stepped version of their probability mass function is available through the same mappings used for density functions of continuous distributions. This integrates discrete distributions into the same broader framework used to construct other visualization types in \textit{ggdist}.
+
+Both of these examples demonstrate how the broader \textit{ggdist} community has engaged with the software and contributed productively to its improvement. Several issues and features have stemmed other R package authors using \textit{ggdist}  (15 other packages, not including \textit{tidybayes}, depend on \textit{ggdist}). Overall, I think \textit{ggdist} has garnered a modest following, including numerous highly-engaged users who have contributed meaningfully to its improvement. 
 
 \section{Reflections and lessons learned}
 
 \textit{ggdist} has been under development in some form or another for about six--seven years, and over that time has evolved through user feedback and several waves of refactoring and rewriting. Through all that, I'd hope I've learned a few things that may be useful for others tackling uncertainty visualization to consider.
 
-\subsection{Something about dist syntax}
+\subsection{Distributional notation makes uncertainty visualization much less annoying}
 \textbf{TODO} distributions as core to uncertainty vis, unifying Bayes/freq, power of the syntax itself (making parameters into data, vectorization of arguments to create distributions made the dist+args syntax obsolete, etc)
 
-The core use of distributional visualization to enable a variety of uncertainty visualization types was inspired by our earlier work developing a \textit{Probabilistic Grammar of Graphics} (\textsc{pgog})~\cite{pu2020probabilistic}, which tackled the problem of specifying area and unit visualizations of conditional probability distributions by integrating probability notation into the grammar of graphics. \textsc{pgog} focused mainly on product plots~\cite{wickham2011product}, icon arrays~\cite{ancker2006design}, and dotplots~\cite{wilkinson1999dot}, while \textit{ggdist} expands the expressiveness of a distributional visualization syntax to cover visualization types that are not just functions of density and mass functions, but also functions of \textsc{cdf}s and intervals.\footnote{On the other hand, \textit{ggdist} still does not implement the conditional probability syntax we had in \textsc{pgog}, though the mini-\textsc{dsl} for probability expressions was inspired by it. In a way, \textit{ggdist} has to be more conservative at integrating crazier ideas from research since it has actual users, and also, while the conditional syntax in \textsc{pgog} is elegant for specifying a general class of probabilistic visualizations, its use cases for uncertainty specifically are a little less clear to me. So we'll see.} 
+The core use of distributional visualization to enable a variety of uncertainty visualization types was inspired by our earlier work developing a \textit{Probabilistic Grammar of Graphics} (\textsc{pgog})~\cite{pu2020probabilistic}, which tackled the problem of specifying area and unit visualizations of conditional probability distributions by integrating probability notation into the grammar of graphics. \textsc{pgog} focused mainly on product plots~\cite{wickham2011product}, icon arrays~\cite{ancker2006design}, and dotplots~\cite{wilkinson1999dot}, while \textit{ggdist} expands the expressiveness of a distributional visualization syntax to cover visualization types that are not just functions of density and mass functions, but also functions of \textsc{cdf}s and intervals.\footnote{On the other hand, \textit{ggdist} still does not implement the conditional probability syntax we had in \textsc{pgog}---though the mini-\textsc{dsl} for probability expressions was inspired by it---and it does not support product plots or stacked densities. In a way, \textit{ggdist} has to be more conservative at integrating crazier ideas from research since it has actual users, and also, while the conditional syntax in \textsc{pgog} is elegant for specifying a general class of probabilistic visualizations, its use cases for uncertainty specifically are a little less clear to me. So we'll see.} 
 
-A key insight from working on both \textsc{pgog} and \textit{ggdist} is that bringing notation for probability distributions into the grammar of graphics is a powerful, expressive way to create visualizations of distributions and uncertainty. The additional insight---that frequentist uncertainty visualization can be brought into that same framework under the remit of \textit{confidence distributions}~\cite{xie2013confidence}---frees us from multiple tyrannies: (1) endless battles about whether one should be a frequentist or Bayesian when you just want to get on with visualizing your uncertainty; (2) memorizing silly little formulas\footnote{Pedants get one properly typeset ``formul\ae'' per paper. There it was.} for this or that test statistic; (3) implementing different, mutually incompatible, and wholly brittle code paths for visualizing uncertainty under different statistical paradigms. A better world is possible!
+A key insight from working on both \textsc{pgog} and \textit{ggdist} is that bringing notation for probability distributions into the grammar of graphics is a powerful, expressive way to create visualizations of distributions and uncertainty. Iterating on that syntax through user feedback 
+(\cref{sec:use-in-the-wild}) has lead to, I think, an approachable abstraction for uncertainty visualization. An additional insight---that frequentist uncertainty visualization can be brought into that same framework under the remit of \textit{confidence distributions}~\cite{xie2013confidence}---frees us from multiple tyrannies: (1) endless battles about whether one should be a frequentist or Bayesian when you just want to get on with visualizing your uncertainty; (2) memorizing silly little formulas\footnote{Pedants get one properly typeset ``formul\ae'' per paper. There it was.} for this or that test statistic; (3) implementing different, mutually incompatible, and wholly brittle code paths for visualizing uncertainty under different statistical paradigms. A better world is possible!
 
 \subsection{Something about shortcut stats/geoms, user feedback, and balancing abstraction and learnability, good defaults}
 
@@ -706,7 +740,7 @@ Maybe something about the various bits of machinery for distributions: discrete/
 
 faceting too awkward, needing thickness for dodging, etc.
 
-\subsection{Uncertainty is difficult to factor out into data pre-processing}
+\subsection{Uncertainty visualization is tightly coupled with grammar of graphics scales}
 \label{sec:jacobians}
 
 As an earlier footnote alluded,\textsuperscript{\ref{foot:jacobians}}   we must be very careful when visualizing density functions. A na\"{i}ve implementation of \texttt{stat\_slab} might simply pass $x$ values through the density function of the distribution mapped to $x_\textsc{dist}$. However, if a non-linear scale transformation is applied, this will result in incorrect densities. This is because, for a random variable $Y = g(X)$, the density function $f_Y$ is:
@@ -757,7 +791,7 @@ ggplot() +
   \end{minipage}
 \hfill\break
 
-Clearly the median does not divide the area into two regions with equal mass, as it should. I have no doubt this has led to errors amongst users of \textit{ggplot2}.\footnote{For example, issue \href{https://github.com/tidyverse/ggplot2/issues/4783}{\#4783} in the \textit{ggplot2} repository is written by a user asking why a theoretical density and samples from a distribution do not line up under transformation---a less attentive user might never have noticed.} Fortunately, \textit{ggdist} does know how to correctly transform densities. It uses a combination of symbolic and (as a fallback) numeric differentiation to calculate derivatives of \textit{ggplot2} scale transformations to adjust densities.\footnote{Specifically, \textit{ggdist} applies R's built-in \texttt{D} function to get the symbolic derivative of the expression defining the scale function and, if that fails, uses \texttt{numDeriv::jacobian}~\textbf{CITE}. In the future, if my pull request \href{https://github.com/r-lib/scales/pull/341}{\#341} to the \textit{scales} package is accepted, determining the derivatives of scale functions will be offloaded into the guts of \textit{ggplot2} and simultaneously be made more reliable.} As a result, we can visualize a log-transformed log-Normal density and get the correct result:
+The line at 1 does not divide the area into two regions with equal mass, as it should if it were the median. I have no doubt this has led to errors amongst users of \textit{ggplot2}.\footnote{For example, issue \href{https://github.com/tidyverse/ggplot2/issues/4783}{\#4783} in the \textit{ggplot2} repository is written by a user asking why a theoretical density and samples from a distribution do not line up under transformation---a less attentive user might never have noticed.} Fortunately, \textit{ggdist} does know how to correctly transform densities. It uses a combination of symbolic and (as a fallback) numeric differentiation to calculate derivatives of \textit{ggplot2} scale transformations to adjust densities.\footnote{Specifically, \textit{ggdist} applies R's built-in \texttt{D} function to get the symbolic derivative of the expression defining the scale function and, if that fails, uses \texttt{numDeriv::jacobian}~\textbf{CITE}. In the future, if my pull request \href{https://github.com/r-lib/scales/pull/341}{\#341} to the \textit{scales} package is accepted, determining the derivatives of scale functions will be offloaded into the guts of \textit{ggplot2} and simultaneously be made more reliable.} As a result, we can visualize a log-transformed log-Normal density and get the correct result:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
@@ -775,7 +809,7 @@ ggplot() +
   \end{minipage}
 \hfill\break
 
-This emphasizes the need for uncertainty visualization systems to be \textit{scale-aware}: it is not possible to comprehensively implement uncertainty visualization purely as a data pre-processing step. This is one example of what Xiaoying Pu~\footnote{Let's be honest, Xiaoying did all the hard work.} and I termed a \textit{tight coupling} of data transformation and visualization specification in a study of expert \textit{ggplot2} users~\cite{pu2023inpractice}: the data processing (calculating the density) is tightly coupled with the visualization spec (the scale transformation), and these must be kept in sync. Moving the specification of densities into the visualization spec itself is one way to ensure this, eliminating a whole class of errors. 
+This emphasizes the need for uncertainty visualization systems to be \textit{scale-aware}: it is not possible to comprehensively implement uncertainty visualization purely as a data pre-processing step.\footnote{It also suggests that grammar of graphics systems should implement derivatives as part of their scale transformation functions.} This is one example of what Xiaoying Pu and I\footnote{Let's be honest, Xiaoying did all the hard work.} termed a \textit{tight coupling} of data transformation and visualization specification in a study of expert \textit{ggplot2} users~\cite{pu2023inpractice}: the data processing (calculating the density) is tightly coupled with the visualization spec (the scale transformation), and these must be kept in sync. Moving the specification of densities into the visualization spec itself is one way to ensure this, eliminating a whole class of errors. 
 
 
 \subsection{Where to go from here}
@@ -792,14 +826,14 @@ See above.\footnote{This final footnote is my small protest against the inane ac
 \label{sec:supplemental_materials}
 
 All supplemental materials are available on Zenodo at \textbf{TODO} and on GitHub at \href{https://github.com/mjskay/ggdist-paper}{github.com/mjskay/ggdist-paper}, released under a CC BY 4.0 license.
-Materials include (1) an RMarkdown file that generates the figures in the paper; (2) generated figure images; and (3) the full source of this paper.
+Materials include (1) an RMarkdown file that generates the figures in the paper; (2) generated figure images; (3) a tagged archive of \textit{ggdist} Github issues; (4) an RMarkdown file calculating some descriptive statistics of \textit{ggdist} Github isses; and (5) the full source of this paper.
 
-The full source of \textit{ggdist} is on Zenodo (\href{https://doi.org/10.5281/zenodo.3879620}{doi:10.5281/zenodo.3879620}) and on GitHub (\href{https://github.com/mjskay/ggdist}{github.com/mjskay/ggdist}), released under a GPL 3.0 license.
+The full source of \textit{ggdist}, released under a GPL 3.0 license, is available on GitHub (\href{https://github.com/mjskay/ggdist}{github.com/mjskay/ggdist}) and archived on Zenodo (\href{https://doi.org/10.5281/zenodo.3879620}{doi:10.5281/zenodo.3879620}).
 
 \section*{Figure Credits}
 \label{sec:figure_credits}
 
-All figures were created by Matthew Kay.
+All figures were created by Matthew Kay and are released under a CC-BY 4.0 license.
 
 %% if specified like this the section will be ommitted in review mode
 \acknowledgments{%
