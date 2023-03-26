@@ -342,7 +342,7 @@ p = preds |>
   guides(fill = "none")
 
 p
-# ggsave("figs/3-lineribbon.pdf", device = cairo_pdf)
+ggsave("figs/3-lineribbon.pdf", device = cairo_pdf)
 ```
 
 lineribbon fan:
