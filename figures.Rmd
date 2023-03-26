@@ -372,7 +372,7 @@ two_a = data.frame(
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab() +
-  stat_pointinterval(.width = 0.66, linewidth = 0.5) +
+  stat_pointinterval(.width = 0.66, linewidth = 0.5, side = "top") +
   bracket_(x = 14, y = 2, yend = 2.9) +
   bracket_(x = 14, y = 1, yend = 1.9) +
   label_(x = 13.5, y = 2.5, label = "thickness", fontface = "italic", hjust = 1, vjust = 0.9) +
