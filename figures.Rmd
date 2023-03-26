@@ -21,10 +21,10 @@ library(dplyr)               # for data manipulation
 library(systemfonts)         # for using system fonts
 library(brms)
 library(posterior)           # rvar
-library(colorspace)          # continuous color palettes
 library(patchwork)
 library(ggtext)              # element_textbox_simple
 library(ragg)                # agg_png
+library(colorspace)
 ```
 
 And this ggplot theme, based on `theme_ggdist()`, using the Source Sans Pro font (in the `fonts/` folder):
@@ -48,7 +48,7 @@ theme_set(
 And some functions we'll use for annotating stuff:
 
 ```{r}
-red_ = "#d95f02"
+red_ = "#e41a1c"
 blue_ = "#6BAED6"
 label_color = red_
 
@@ -76,13 +76,6 @@ label_ = function(..., hjust = 0, color = label_color, family = "serif") {
     ...
   )
 }
-```
-
-And color palettes:
-
-```{r}
-# sequential version of COlorBrewer Blues that ends in white
-sequential_hcl(n = 7, h = 245, c = c(50, 75, NA), l = c(20, 100), power = 0.8, register = "Blue-White")
 ```
 
 
@@ -162,8 +155,7 @@ dists_plot = dists_df %>%
     y = NULL
   )
 
-slabinterval_teaser = (dists_header_plot / dists_plot) + plot_layout(heights = c(1.2, 8))
-slabinterval_teaser
+(dists_header_plot / dists_plot) + plot_layout(heights = c(1.2, 8))
 ```
 
 
@@ -266,7 +258,7 @@ p = data.frame(a = dist_normal(0, 1)) |>
   stat_pointinterval(aes(interval_color = after_stat(level)), linewidth = 18, .width = c(.5, .8, .95)) +
   scale_y_continuous(breaks = NULL) +
   scale_x_continuous(breaks = NULL, limits = c(-2.5, 2.5)) +
-  scale_color_brewer(aesthetics = "interval_color") +
+  scale_color_brewer(palette = "Greys", aesthetics = "interval_color") +
   labs(y = NULL, x = NULL, interval_color = "mass")
 
 p
@@ -293,7 +285,7 @@ p = data.frame(a = dist_normal(0, 1)) |>
   stat_pointinterval() +
   scale_y_continuous(breaks = NULL) +
   scale_x_continuous(breaks = NULL, limits = c(-2.5, 2.5)) +
-  label_(label = "Normal(italic(mu), italic(sigma))", x = 0, y = 0.15, hjust = 0.5, vjust = 1, parse = TRUE) +
+  label_(label = "Normal(italic(mu), italic(sigma))", x = 0, y = 0.17, hjust = 0.5, vjust = 1, parse = TRUE) +
   labs(y = NULL, x = NULL)
 
 p
@@ -306,7 +298,7 @@ p = data.frame(a = dist_student_t(6, 0, 1)) |>
   stat_pointinterval() +
   scale_y_continuous(breaks = NULL) +
   scale_x_continuous(breaks = NULL, limits = c(-2.5, 2.5)) +
-  label_(label = "italic(t[nu])(italic(mu), italic(sigma))", x = 0, y = 0.35, hjust = 0.5, vjust = 1, parse = TRUE) +
+  label_(label = "italic(t[nu])(italic(mu), italic(sigma))", x = 0, y = 0.4, hjust = 0.5, vjust = 1, parse = TRUE) +
   labs(y = NULL, x = NULL)
 
 p
@@ -328,12 +320,15 @@ m_mpg = brm(
   seed = 3142013
 )
 ```
+
+And generate the predictions:
+
 ```{r}
 set.seed(9304929)
 preds = data.frame(weight = seq(min(cars$weight), max(cars$weight), length.out = 100))
 preds = preds |>
   mutate(mpg_given_weight = rvar(posterior_predict(m_mpg, preds)))
-preds
+head(preds)
 ```
 
 Now the vis:
@@ -342,8 +337,8 @@ Now the vis:
 p = preds |>
   ggplot(aes(x = weight)) +
   stat_lineribbon(aes(ydist = mpg_given_weight), linewidth = 0.75) +
-  geom_point(aes(y = mpg), data = cars, color = alpha("black", 0.75), stroke = 0.5, shape = 21, fill = alpha("gray85", 0.5)) +
-  scale_fill_brewer() +
+  geom_point(aes(y = mpg), data = cars, color = alpha(label_color, 0.65), stroke = 0.65, shape = 21, fill = alpha("white", 0.35), size = 1.25) +
+  scale_fill_brewer(palette = "Greys") +
   guides(fill = "none")
 
 p
@@ -356,8 +351,8 @@ lineribbon fan:
 p = preds |>
   ggplot(aes(x = weight)) +
   stat_lineribbon(aes(ydist = mpg_given_weight, fill = after_stat(.width)), linewidth = 0.75, .width = ppoints(100)) +
-  geom_point(aes(y = mpg), data = cars, color = alpha("black", 0.75), stroke = 0.5, shape = 21, fill = alpha("gray85", 0.5)) +
-  colorspace::scale_fill_continuous_sequential(palette = "Blue-White", rev = FALSE) +
+  geom_point(aes(y = mpg), data = cars, color = alpha(label_color, 0.65), stroke = 0.65, shape = 21, fill = alpha("white", 0.35), size = 1.25) +
+  scale_fill_gradient(low = "gray20", high = "white") +
   guides(fill = "none")
 
 p
@@ -377,7 +372,7 @@ two_a = data.frame(
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab() +
-  stat_pointinterval(.width = 0.95, linewidth = 0.5) +
+  stat_pointinterval(.width = 0.66, linewidth = 0.5, color = label_color) +
   bracket_(x = 14, y = 2, yend = 2.9) +
   bracket_(x = 14, y = 1, yend = 1.9) +
   label_(x = 13.5, y = 2.5, label = "thickness", fontface = "italic", hjust = 1, vjust = 0.9) +
@@ -395,7 +390,7 @@ ggsave("figs/3-slab_density_two_groups.pdf", device = cairo_pdf)
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab(aes(alpha = !!p_(x)), thickness = 1, side = "both", fill_type = "gradient", scale = 0.7) +
-  stat_pointinterval(.width = 0.95, linewidth = 0.5) +
+  stat_pointinterval(.width = 0.66, linewidth = 0.5, color = label_color) +
   scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
   scale_y_discrete(expand = expansion(0.15)) +
   scale_alpha_continuous(range = c(0, 1), guide = "none") +
@@ -411,7 +406,7 @@ Correll gradients
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab(aes(alpha = - pmax(abs(2*!!Pr_(X <= x) - 1), .95)), thickness = 1, side = "both", fill_type = "gradient", scale = 0.7) +
-  stat_pointinterval(.width = 0.95, linewidth = 0.5) +
+  stat_pointinterval(.width = 0.66, linewidth = 0.5, color = label_color) +
   scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
   scale_y_discrete(expand = expansion(0.15)) +
   scale_alpha_continuous(range = c(0, 1), guide = "none") +
@@ -427,7 +422,7 @@ Helske violin gradients
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab(aes(alpha = - pmax(abs(2*!!Pr_(X <= x) - 1), .85)), side = "both", fill_type = "gradient") +
-  stat_pointinterval(.width = 0.95, linewidth = 0.5) +
+  stat_pointinterval(.width = 0.66, linewidth = 0.5, color = label_color) +
   scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
   scale_y_discrete(expand = expansion(0.15)) +
   scale_alpha_continuous(range = c(0, 1), guide = "none") +
@@ -443,10 +438,10 @@ Helske-like violin intervals:
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab(aes(fill = after_stat(level)), side = "both", .width = c(.5, .8, .95, 1)) +
-  stat_pointinterval(.width = 0.95, linewidth = 0.5) +
+  stat_pointinterval(.width = 0.66, linewidth = 0.5, color = label_color) +
   scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
   scale_y_discrete(expand = expansion(0.15)) +
-  scale_fill_brewer() +
+  scale_fill_discrete_sequential(palette = "Grays", nmax = 8) +
   guides(fill = "none") +
   labs(x = NULL)
 
@@ -459,7 +454,8 @@ Raindrop plots:
 ```{r slab_raindrop, fig.width = 2.5, fig.height = 1.5}
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
-  stat_eye(aes(thickness = ifelse(.width <= .95, log(!!p_(x)), NA)), normalize = "groups", .width = .95, linewidth = 0.5) +
+  stat_slab(aes(thickness = ifelse(.width <= .95, log(!!p_(x)), NA)), normalize = "groups", .width = .95, linewidth = 0.5, side = "both") +
+  stat_pointinterval(.width = 0.66, linewidth = 0.5, color = label_color) +
   scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
   scale_y_discrete(expand = expansion(0.15)) +
   guides(alpha = "none") +
@@ -475,7 +471,7 @@ Fuzzygrams:
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab(aes(alpha = !!Pr_(X > x)), thickness = 1, side = "both", fill_type = "gradient", scale = 0.7) +
-  stat_pointinterval(.width = 0.95, linewidth = 0.5) +
+  stat_pointinterval(.width = 0.66, linewidth = 0.5, color = label_color) +
   scale_x_continuous(breaks = NULL, limits = c(-3, 14), expand = expansion(0)) +
   scale_y_discrete(expand = expansion(0.15)) +
   scale_alpha_continuous(range = c(0, 1), guide = "none") +
@@ -498,6 +494,7 @@ two_a_zero = data.frame(
 p = two_a_zero |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab(aes(fill = after_stat(abs(x) < 2))) +
+  # stat_pointinterval(.width = 0.66, linewidth = 0.5, color = label_color) +
   scale_x_continuous(breaks = seq(-2, 14, by = 2)) +
   scale_y_discrete(expand = expansion(0.15)) +
   scale_fill_manual(
@@ -554,7 +551,7 @@ ggsave("figs/3-dots_emoji.png", device = agg_png, dpi = 900)
 p = ggplot() +
   stat_function(fun = \(x) dlnorm(x, 0, 1), n = 1000, fill = "gray75", geom = "area") +
   geom_vline(xintercept = 1, color = label_color, linewidth = 0.5) +
-  label_(x = 1.3, y = 0.625, label = "median") +
+  label_(x = 1.4, y = 0.675, label = "median", vjust = 1, hjust = 0) +
   scale_x_continuous(limits = c(0, 10), breaks = 0:10) +
   scale_y_continuous(breaks = NULL) +
   labs(x = NULL, y = NULL)
@@ -567,7 +564,7 @@ ggsave("figs/3-jacobian-lognorm.pdf", device = cairo_pdf)
 p = ggplot() +
   stat_function(fun = \(x) dlnorm(x, 0, 1), n = 1000, geom = "area", fill = "gray75") +
   geom_vline(xintercept = 1, color = label_color, linewidth = 0.5) +
-  label_(x = 1.35, y = 0.625, label = "median???") +
+  label_(x = 1.4, y = 0.675, label = "median should\nbe here???", vjust = 1, hjust = 0) +
   scale_x_log10(limits = 10^c(-2,2), breaks = 10^(-2:2), labels = as.character) +
   scale_y_continuous(breaks = NULL) +
   labs(x = NULL, y = NULL)
@@ -580,7 +577,7 @@ ggsave("figs/3-jacobian-incorrect.pdf", device = cairo_pdf)
 p = ggplot() +
   stat_slab(aes(xdist = dist_lognormal(0, 1)), scale = 1, fill = "gray75") +
   geom_vline(xintercept = 1, color = label_color, linewidth = 0.5) +
-  label_(x = 1.75, y = 0.95, label = "median :)") +
+  label_(x = 1.75, y = 1, label = "median is here :)", vjust = 1) +
   scale_x_log10(limits = 10^c(-2,2), breaks = 10^(-2:2), labels = as.character) +
   scale_y_continuous(breaks = NULL) +
   labs(x = NULL, y = NULL)
