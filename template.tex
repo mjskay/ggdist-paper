@@ -646,7 +646,7 @@ M &\rightarrow x_\textsc{dist}\\
 
 It is worth noting that \textit{ggplot2} has a \textit{dotplot} geometry already, but that it is often awkward to use: because it uses a bin width specified by the user, there is no guarantee the dotplot will fit inside the available space, often leading to stacks of dots running outside the plot region. By contrast, the \textit{dots} geometry in \textit{ggdist} uses numerical optimization to automatically find a shared bin width across all dotplots in the geometry that ensures they fit in the available space (notice I did not specify bin width above).\footnote{It also allows constraints on minimum and maximum bin width, and has various options for what to do if those constraints may be exceeded, such as compressing the layout so that dots may overlap. Anecdotally, automatic dotplot layout is one of the most popular features of \textit{ggdist}, as it relieves the intense frustration of that endless tweaking cycle to get the dot size right.}
 
-One property of dotplots is the opportunity to encode additional information in the dots themselves. A trivial example in \textit{ggdist} is to use emoji to encode just how you feel about possible effect sizes in the distribution:\footnote{This example was inspired by \href{https://twitter.com/Birdbassador/status/916332327696875520}{a tweet} from Michael Correll suggesting effect sizes at \textsc{vis} might be best described with a dotplot of poop emojis. I was delighted to find that \textit{ggdist} \href{https://twitter.com/mjskay/status/1361366253424832512}{could replicate that idea}, but have spared the literature a faithful rendering of the poopmoji plot by using smiley faces here.}
+One property of dotplots is the opportunity to encode additional information in the dots themselves. We can take advantage of Unicode support in the \textit{shape} aesthetic (which determines how points are drawn) to use emoji to encode just how we feel about possible effect sizes in a distribution:\footnote{This example was inspired by \href{https://twitter.com/Birdbassador/status/916332327696875520}{a tweet} from Michael Correll suggesting effect sizes at \textsc{vis} might be best described with a dotplot of poop emojis. I was delighted to find that \textit{ggdist} \href{https://twitter.com/mjskay/status/1361366253424832512}{could replicate that idea}, but have spared the literature a faithful rendering of the poopmoji plot by using smiley faces here.}
 
 
 \noindent
@@ -665,20 +665,31 @@ x > 0 &\rightarrow \textit{shape}\\
   \end{minipage}
 \hfill\break
 
-This plot does require specifying more particularly what the \textit{shape} scale function is. Abstractly, if we assume each aesthetic mapping \textit{foo} has a scale function $s_\textit{foo}$, we might define the scale function for \textit{shape} as:
+This plot does require specifying what the \textit{shape} scale function is. Abstractly, if we assume each aesthetic mapping \textit{foo} has a scale function $s_\textit{foo}$, we might define the scale function for \textit{shape} as:
+
+\newcommand{\smiley}{\raisebox{-2pt}{\includegraphics[width=8pt]{emoji-smile.png}}}
+\newcommand{\frowny}{\raisebox{-2pt}{\includegraphics[width=8pt]{emoji-frown.png}}}
 
 \[
-s_\textit{shape}(x): x \mapsto \left\{ \begin{array}{ll} \textbf{TODO} & \textrm{if } x\\ \textbf{TODO} & \textrm{if }  
+s_\textit{shape}(x): x \mapsto \left\{ \begin{array}{ll} \smiley & \textrm{if } x\\ \frowny & \textrm{if }  
  \neg x \end{array} \right.
 \]
 
 In \textit{ggplot2} this is:
 
-\begin{centerverbatim}
-scale_shape_manual(
-  values = c("TRUE" = "\textbf{TODO}", "FALSE" = "\textbf{TODO}")
-)  
-\end{centerverbatim}
+{
+\hfill\break
+\small
+\centering
+\varwidth{\linewidth}
+\noindent
+\verb|scale_shape_manual(|\\
+\verb|  values = c("TRUE" = "|\smiley\verb|", "FALSE" = "|\frowny\verb|")|\\
+\verb|)|  
+\endvarwidth
+\par
+\hfill\break
+}
 
 This may seem manifestly silly, but there's something to the idea of making discrete outcomes more concrete or at least memorable through graphic depictions, whether it be with emoji or other icons~\textbf{CITE}. Since arbitrary fonts can be used with \textit{ggplot2} shapes, it is one avenue to creating more expressive dotplots: for example, I have used Alberto Cairo's \textit{Wee People} font~\textbf{CITE} to create dotplots with anthropomorphic icons.~\textbf{CITE}
 
