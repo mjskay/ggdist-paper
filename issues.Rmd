@@ -1,0 +1,163 @@
+---
+title: "Analysis of ggdist issues"
+author: "Matthew Kay"
+date: "2023-03-25"
+output: html_document
+---
+
+## Introduction
+
+This document does some simple data cleaning of issues exported from the `ggdist` Github repository for the paper, *ggdist: Visualizations of Distributions and Uncertainty in the Grammar of Graphics*.
+
+## Setup
+
+These libraries are needed to build this file:
+
+```{r setup}
+library(ggplot2)
+library(ggdist)
+library(jsonlite)
+library(dplyr)               # for data manipulation
+library(rlang)
+library(readr)
+
+theme_set(theme_ggdist())
+```
+
+## Data
+
+The JSON file containing issues from the `ggdist` repository is `issues.json`, and
+was generated using this [Github CLI](https://cli.github.com/) command on March 25, 2023:
+
+```
+gh issue list --json assignees,author,body,closed,closedAt,comments,createdAt,labels,milestone,number,id,title,reactionGroups,state,updatedAt,url --limit 1000 --state all > issues.json
+```
+
+We will load it into R:
+
+```{r load_json}
+issues = read_json("issues.json")
+```
+
+Let's turn this into a data frame at the top level so it's easier to work with:
+
+```{r}
+issues_df = bind_rows(lapply(issues, \(issue) {
+  # some fields need to be wrapped in a list so the output is a list column
+  if (length(issue$comments) > 0) issue$comments = list(issue$comments)
+  issue$labels = list(vapply(issue$labels, `[[`, "name", FUN.VALUE = character(1)))
+  issue$assignees = list(vapply(issue$assignees, `[[`, "login", FUN.VALUE = character(1)))
+  # for some fields, we only want the human-readable name, not metadata
+  issue$author = issue$author$login
+  issue$milestone = issue$milestone$title
+  # encode zero-length entries as NA
+  issue = lapply(issue, \(entry) if (length(entry) == 0) NA else entry)
+
+  issue_df = as_tibble(issue)
+  if (nrow(issue_df) != 1) {
+    print(issue$number)
+    stop()
+  }
+  # stopifnot(nrow(issue_df) == 1)
+  issue_df
+})) |>
+  mutate(
+    closedAt = parse_datetime(closedAt),
+    createdAt = parse_datetime(createdAt),
+    updatedAt = parse_datetime(updatedAt),
+  )
+
+glimpse(issues_df)
+```
+
+Now, let's encode the remaining list-columns into strings so we can output something useful to CSV format:
+
+```{r}
+issues_df |>
+  mutate(
+    assignees = vapply(assignees, paste0, collapse = ",", FUN.VALUE = character(1)),
+    labels = vapply(labels, paste0, collapse = ",", FUN.VALUE = character(1)),
+    comments = sapply(comments, \(comments) {
+      paste0(lapply(comments, \(comment) 
+        paste0(
+          "----------------------------\n", 
+          comment$author$login, ":\n\n", 
+          comment$body
+        )),
+      collapse = "\n\n")
+    })
+  ) |>
+  write_excel_csv("issues.csv")
+```
+
+After this export, I manually imported the above CSV into Excel and tagged some issues (the `from_users` and `notes` columns) and saved the output in `issues_tagged.xlsx` and `issues_tagged.csv`. Let's import that updated csv now:
+
+```{r}
+issues_tagged = read_csv("issues_tagged.csv",
+  col_type = cols(
+    closed = col_logical(),
+    number = col_double(),
+    from_users = col_logical(),
+    createdAt = col_datetime(),
+    closedAt = col_datetime(),
+    updatedAt = col_datetime(),
+    .default = col_character()
+  )
+)
+```
+
+## Summaries
+
+Closed issues:
+
+```{r}
+table(issues_tagged$closed)
+prop.table(table(issues_tagged$closed))
+```
+Open issues are in these categories:
+
+```{r}
+table(unique(issues_tagged[!issues_tagged$closed,]$notes))
+```
+
+Number of authors (including me):
+
+```{r}
+length(unique(issues_tagged$author))
+```
+
+Number of issues created by users directly:
+
+```{r}
+table(issues_tagged$author != "mjskay")
+prop.table(table(issues_tagged$author != "mjskay"))
+```
+
+
+Number of issues that stemmed from users, even if not created by them directly (e.g., because I created an issue based on a user's comment on another issue, or from a Twitter conversation with that user, etc):
+
+```{r}
+table(issues_tagged$from_users)
+prop.table(table(issues_tagged$from_users))
+```
+
+Breakdown of categories: first, all unique combinations:
+
+```{r}
+table(issues_tagged$notes)
+```
+
+We don't really care about issues that are *purely* internal: e.g., refactoring, code cleanup, performance, etc. So we'll just lump those all together as "internal":
+
+```{r}
+categories = issues_tagged$notes
+categories[categories %in% c("refactor", "cleanup", "internal", "performance")] = "internal"
+```
+
+Then we'll count categories (note: these are not unique per-issue):
+
+```{r}
+cat_counts = sort(table(unlist(strsplit(categories, ","))))
+cat_counts / nrow(issues_tagged) #can't use prop table because categories overlap
+```
+
