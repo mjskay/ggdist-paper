@@ -1,5 +1,7 @@
 # Source and supplement for the paper *ggdist: Visualizations of Distributions and Uncertainty in the Grammar of Graphics*
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7770984.svg)](https://doi.org/10.5281/zenodo.7770984)
+
 *Matthew Kay, Northwestern University*
 
 This repository is based on the IEEE TVCG paper format repository. The main files of interest are:
