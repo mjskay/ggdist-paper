@@ -416,6 +416,32 @@ p
 ggsave("figs/3-slab_gradient_correll.pdf", device = cairo_pdf)
 ```
 
+Consonance curve
+
+```{r slab_consonance, fig.width = 2.5, fig.height = 1.5}
+p = two_a |>
+  filter(group == "a") |>
+  ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = 0, thickness = 1 - abs(2*!!Pr_(X < x) - 1))) +
+  stat_slab(scale = 1) +
+  stat_pointinterval(aes(thickness = NULL), .width = c(0.5, .95), side = "top", point_size = 0, color = label_color) +
+  geom_hline(yintercept = c(0.05, 0.5), color = label_color, alpha = 0.25, linetype = "22") +
+  stat_spike(at = \(x) qi(x, .width = .5), n = 1001, scale = 1, size = 0, color = label_color, alpha = 0.5) +
+  stat_spike(at = \(x) qi(x, .width = .95), n = 1001, scale = 1, size = 0, color = label_color, alpha = 0.5) +
+  scale_x_continuous(breaks = NULL, limits = c(-3, 14), expand = expansion(0)) +
+  scale_y_continuous(expand = expansion(0.05), limits = c(0, 1), breaks = c(0, 1)) +
+  label_(x = -2.7, y = c(0.05, 0.5) + .04, label = c("0.05", "0.50"), hjust = 0, vjust = 0) +
+  label_(x = c(9.8,7.3), y = c(0.05, 0.5) + .04, label = c("95% CI", "50% CI"), hjust = 0, vjust = 0) +
+  scale_thickness_shared() +
+  labs(
+    x = NULL, 
+    y = quote(1 - abs(2 * italic(F)[italic(M)](italic(x)) - 1))
+  ) +
+  theme(axis.title.y.left = element_text(family = "serif", color = label_color))
+
+p
+ggsave("figs/3-slab_consonance.pdf", device = cairo_pdf)
+```
+
 Helske violin gradients
 
 ```{r slab_violin_gradient, fig.width = 2.5, fig.height = 1.5}
