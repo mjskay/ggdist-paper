@@ -6,6 +6,7 @@ This repository is based on the IEEE TVCG paper format repository. The main file
 
 * `BUILDING.md`: The original `README` file from the IEEE TVCG template repository, which contains instructions for building the paper from source.
 * `template.tex`: The source LaTeX file for the body of the paper.
+* `template.pdf`: The rendered paper.
 * `figures.Rmd`: The RMarkdown file used to generate figures for the paper.
 * `issues.json`, `issues.csv`: An archive of [*ggdist* Github issues](https://github.com/mjskay/ggdist/issues).
 * `issues_tagged.csv`, `issues_tagged.xlsx`: A lightly-tagged version of the *ggdist* Github issues.
