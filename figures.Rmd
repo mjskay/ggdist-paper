@@ -220,7 +220,7 @@ p = data.frame(
 ) %>%
   ggplot(aes(y = abc, x = value, fill = abc)) +
   stat_slab(density = "unbounded") +
-  stat_dotsinterval(side = "bottom", slab_linewidth = NA, layout = "bin") +
+  stat_dotsinterval(side = "bottom", slab_linewidth = NA, slab_color = NA, layout = "bin") +
   scale_fill_brewer(palette = "Set2")
 
 p
