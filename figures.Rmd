@@ -25,6 +25,9 @@ library(patchwork)
 library(ggtext)              # element_textbox_simple
 library(ragg)                # agg_png
 library(colorspace)
+library(broom)               # augment
+library(tidyr)
+library(palmerpenguins)
 ```
 
 And this ggplot theme, based on `theme_ggdist()`, using the Source Sans Pro font (in the `fonts/` folder):
@@ -80,6 +83,8 @@ label_ = function(..., hjust = 0, color = label_color, family = "serif") {
 
 
 ## Teaser
+
+### slabinterval
 
 ```{r slabinterval_teaser, echo=FALSE, fig.height=4, fig.width=4}
 dists_df = tibble(
@@ -156,7 +161,147 @@ dists_plot = dists_df %>%
   )
 
 (dists_header_plot / dists_plot) + plot_layout(heights = c(1.2, 8))
+
+ggsave("figs/teaser-slabinterval.pdf", device = cairo_pdf)
 ```
+
+### wee people
+
+Based on my [wee people example](https://github.com/mjskay/uncertainty-examples/blob/master/weepeople_dotplots.md).
+
+We need to register the Wee People font:
+
+```{r}
+register_font(
+  name = "weepeople",
+  plain = "fonts/wee-people/weepeople.ttf"
+)
+```
+
+Then set up a dataset of people:
+
+```{r}
+set.seed(1234)
+
+people_df = data.frame(
+  x = qnorm(ppoints(100), 1:2),
+  set = c("a", "b"),
+  icon = factor(sample(52, 100, replace = TRUE))
+) 
+
+# the lower and upper case letters in the Wee People font are people:
+people_letters = c(letters, LETTERS)
+```
+
+Then a plot:
+
+```{r fig.width = 4.0, fig.height = 2.9}
+p = people_df |>
+  ggplot(aes(x = x, y = set, group = set, shape = icon, color = x > 0)) + 
+  geom_dots(family = "weepeople", dotsize = 2.4, layout = "swarm")+ 
+  scale_shape_manual(values = people_letters, guide = "none") +
+  scale_color_brewer(palette = "Set1", guide = "none") +
+  ylab("group")
+
+# p
+ggsave("figs/teaser-weepeople.pdf", plot = p, device = cairo_pdf, width = 4.0, height = 2.9)
+```
+
+
+
+### rainclouds
+
+```{r fig.width = 6.5, fig.height = 4}
+set.seed(12345) # for reproducibility
+
+p = data.frame(
+  abc = c("a", "b", "c"),
+  value = rnorm(600, c(1, 8, 3), c(1, 1.7, 1))
+) %>%
+  ggplot(aes(y = abc, x = value, fill = abc)) +
+  stat_slab(density = "unbounded") +
+  stat_dotsinterval(side = "bottom", slab_linewidth = NA, layout = "bin") +
+  scale_fill_brewer(palette = "Set2")
+
+p
+ggsave("figs/teaser-raincloud.pdf", device = cairo_pdf)
+```
+
+
+### fit lines
+
+```{r fig.width = 6, fig.height = 4}
+m_mpg = lm(mpg ~ hp * cyl, data = mtcars)
+p = mtcars %>%
+  group_by(cyl) %>%
+  expand(hp = seq(min(hp), max(hp), length.out = 101)) %>%
+  augment(m_mpg, newdata = ., se_fit = TRUE) %>%
+  ggplot(aes(x = hp, fill = ordered(cyl), color = ordered(cyl))) +
+  stat_lineribbon(
+    aes(dist = "norm", arg1 = .fitted, arg2 = .se.fit), 
+    alpha = 1/4
+  ) +
+  geom_point(aes(y = mpg), data = mtcars) +
+  
+  scale_fill_brewer(palette = "Set2") +
+  scale_color_brewer(palette = "Dark2") +
+  labs(
+    color = "Cylinders",
+    fill = "Cylinders",
+    y = "Miles/gallon",
+    x = "Horsepower"
+  ) +
+  theme(legend.position = c(0.75, 0.8), legend.direction = "horizontal")
+
+p
+ggsave("figs/teaser-mtcars-lines.pdf", device = cairo_pdf)
+```
+
+### logit dotplots
+
+Fit model:
+
+```{r}
+gentoo = penguins %>%
+  filter(species == "Gentoo", !is.na(sex))
+m = glm(sex == "male" ~ body_mass_g, data = gentoo, family = binomial)
+m
+```
+```{r fig.width = 5, fig.height = 1.75}
+# construct a prediction grid for the fit line
+prediction_grid = with(gentoo, 
+  data.frame(body_mass_g = seq(min(body_mass_g), max(body_mass_g), length.out = 100))
+)
+
+p = prediction_grid %>%
+  bind_cols(predict(m, ., se.fit = TRUE)) %>%
+  mutate(
+    # distribution describing uncertainty in log odds
+    log_odds = dist_normal(fit, se.fit),
+    # inverse-logit transform the log odds to get
+    # distribution describing uncertainty in Pr(sex == "male")
+    p_male = dist_transformed(log_odds, plogis, qlogis)
+  ) %>%
+  ggplot(aes(x = body_mass_g)) +
+  geom_dots(
+    aes(y = as.numeric(sex == "male"), side = sex),
+    scale = 0.5,
+    data = gentoo
+  ) +
+  stat_lineribbon(
+    aes(ydist = p_male), alpha = 1/4, fill = "#08306b"
+  ) +
+  scale_side_mirrored(guide = "none") +
+  coord_cartesian(ylim = c(0, 1)) +
+  labs(
+    x = "Body mass (g) of Gentoo penguins",
+    y = "Pr(sex = male)"
+  )
+  
+p
+ggsave("figs/teaser-logit_dotplots.pdf", device = cairo_pdf)
+```
+
 
 
 ## Setting the stage
