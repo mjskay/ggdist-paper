@@ -612,7 +612,7 @@ p = two_a |>
   stat_pointinterval(.width = 0.66, linewidth = 0.5) +
   scale_x_continuous(breaks = NULL, limits = c(-3, 14)) +
   scale_y_discrete(expand = expansion(0.15)) +
-  scale_fill_discrete_sequential(palette = "Grays", nmax = 8) +
+  scale_fill_discrete_sequential(palette = "Light Grays", nmax = 6) +
   guides(fill = "none") +
   labs(x = NULL)
 
