@@ -811,7 +811,7 @@ ggplot() +
 \hfill\break
 
 
-If we plot this on a log scale, i.e. plot $Y = log(X)$, we should hope to see a Gaussian density with a median of $10^0 = 1$ (since medians are preserved under transformation). However, because \textit{ggplot2} has no way to know this function is a density (nor does it necessarily know the derivative of the scale function), the resulting density will be incorrect:
+If we plot this on a log scale, i.e. plot $Y = \log(X)$, we should hope to see a Gaussian density with a median of $10^0 = 1$ (since medians are preserved under transformation). However, because \textit{ggplot2} has no way to know this function is a density (nor does it necessarily know the derivative of the scale function), the resulting density will be incorrect:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
