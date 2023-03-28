@@ -13,12 +13,12 @@ This document generates the various figures for the paper, *ggdist: Visualizatio
 
 These libraries are needed to build this file:
 
-```{r setup}
+```{r setup, message = FALSE, warning = FALSE}
 library(ggplot2)
 library(ggdist)              # obviously
 library(distributional)      # for dist_...
 library(dplyr)               # for data manipulation
-library(systemfonts)         # for using system fonts
+library(sysfonts)            # for using custom fonts
 library(brms)
 library(posterior)           # rvar
 library(patchwork)
@@ -33,6 +33,16 @@ library(palmerpenguins)
 And this ggplot theme, based on `theme_ggdist()`, using the Source Sans Pro font (in the `fonts/` folder):
 
 ```{r}
+knitr::opts_chunk$set(dev = "ragg_png", fig.ext = "png")
+
+font_add(
+  family = "Source Sans Pro",
+  regular = "fonts/source-sans/SourceSansPro-Regular.ttf",
+  bold = "fonts/source-sans/SourceSansPro-Bold.ttf",
+  italic = "fonts/source-sans/SourceSansPro-Italic.ttf",
+  bolditalic = "fonts/source-sans/SourceSansPro-BoldItalic.ttf",
+)
+
 theme_set(
   theme_light(base_family = "Source Sans Pro") + theme(
     axis.line.x = element_line(color = "gray70", linewidth = rel(0.5)), 
@@ -172,9 +182,9 @@ Based on my [wee people example](https://github.com/mjskay/uncertainty-examples/
 We need to register the Wee People font:
 
 ```{r}
-register_font(
-  name = "weepeople",
-  plain = "fonts/wee-people/weepeople.ttf"
+font_add(
+  family = "weepeople",
+  regular = "fonts/wee-people/weepeople.ttf"
 )
 ```
 
@@ -203,7 +213,7 @@ p = people_df |>
   scale_color_brewer(palette = "Set1", guide = "none") +
   ylab("group")
 
-# p
+p
 ggsave("figs/teaser-weepeople.pdf", plot = p, device = cairo_pdf, width = 4.0, height = 2.9)
 ```
 
