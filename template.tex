@@ -237,7 +237,7 @@ The obvious alternative, at least for interval representations, is to simply spe
   \end{minipage}
 \hfill\break
 
-Here, the magic values $-1.96$ and $+1.96$ are the $(1-95\%/2) = 2.5\%$th and $(1+95\%/2) = 97.5\%$th quantiles of the standard Normal distribution, thus yielding a $97.5\% - 2.5\% = 95\%$ interval. This is generic in the sense that any interval can be represented, but unsatisfying in the sense that we seem to have lost some level of abstraction that was present when we were just thinking in terms of estimates and their variances. This approach also requires that the user knows how to make these calculations. Both \textit{ggplot2} (with \texttt{geom\_pointrange}) and \textit{Vega-lite} (with the \texttt{x} and \texttt{x2} channels supplied to \texttt{errorbar}) offer a variant of this solution for pre-calculated intervals. 
+Here, the magic values $-1.96$ and $+1.96$ are the $(1-95\%)/2 = 2.5\%$th and $(1+95\%)/2 = 97.5\%$th quantiles of the standard Normal distribution, thus yielding a $97.5\% - 2.5\% = 95\%$ interval. This is generic in the sense that any interval can be represented, but unsatisfying in the sense that we seem to have lost some level of abstraction that was present when we were just thinking in terms of estimates and their variances. This approach also requires that the user knows how to make these calculations. Both \textit{ggplot2} (with \texttt{geom\_pointrange}) and \textit{Vega-lite} (with the \texttt{x} and \texttt{x2} channels supplied to \texttt{errorbar}) offer a variant of this solution for pre-calculated intervals. 
 
 I will offer a different solution: to instead represent intervals as properties of a distribution, allowing us to neatly handle both the simple case of Gaussian error and more complex cases. Centering distributions---not standard deviations or intervals---in the specification of uncertainty will also allow us to build a richer set of uncertainty representations.
 
@@ -524,7 +524,7 @@ In \textit{ggdist} this function is either:
     \item    \texttt{-pmax(abs(2*!!Pr\_(X <= x) - 1), .95)}, using the probability expression mini-\textsc{dsl}.
 \end{itemize}
 
-Thus, \textit{ggdist} can create this particularly weird uncertainty visualization without breaking the bonds of its core abstraction. Importantly, the function I've used to construct the tails is not arbitrary; it is meaningful in itself: $1 - \lvert 2 F_M(x) - 1 \rvert$ is the \textit{consonance curve}~\cite{amrhein2022discuss}, which (in the frequentist interpretation) is the two-sided \textit{p}-value for the null hypothesis \textit{x}. Horizontal slices through this curve at a height of $\alpha$ are $(1 - \alpha)\%$ quantile confidence intervals:
+Thus, \textit{ggdist} can create this particularly weird uncertainty visualization without breaking the bonds of its core abstraction. Importantly, the function I've used to construct the tails is not arbitrary; it is meaningful in itself: $1 - \lvert 2 F_M(x) - 1 \rvert$ is the \textit{consonance curve}~\cite{amrhein2022discuss}, which (in the frequentist interpretation) is the two-sided \textit{p}-value for the null hypothesis \textit{M = x}. Horizontal slices through this curve at a height of $\alpha$ are $(1 - \alpha)\%$ quantile confidence intervals:
 
 
 \noindent
