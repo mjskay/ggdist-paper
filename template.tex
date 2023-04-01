@@ -72,7 +72,7 @@
   \centering
   \includegraphics[width=\linewidth]{figs/teaser.pdf}
   \caption{%
-  	Examples from the three major classes of geometries in \textit{ggdist}: \textbf{(A)} \href{https://mjskay.github.io/ggdist/articles/slabinterval.html}{slabintervals}, such as density plots, \textsc{cdf}s, intervals, and gradient plots; \textbf{(B)} \href{https://mjskay.github.io/ggdist/articles/lineribbon.html}{lineribbons}, such as uncertainty bands and fan charts; and \textbf{(D)} \href{https://mjskay.github.io/ggdist/articles/dotsinterval.html}{dots}, such as dotplots and beeswarm charts. Myriad combinations of these are possible, leading to charts like \textbf{(D)} \href{https://lnalborczyk.github.io/post/glm/}{\textit{logit dotplots}} and \textbf{(E)} \textit{raincloud plots}~\cite{allen2019raincloud}.%
+  	Examples from the three major classes of geometries in \textit{ggdist}: \textbf{(A)} \href{https://mjskay.github.io/ggdist/articles/slabinterval.html}{slabintervals}, such as density plots, \textsc{cdf}s, intervals, and gradient plots; \textbf{(B)} \href{https://mjskay.github.io/ggdist/articles/lineribbon.html}{lineribbons}, such as uncertainty bands and fan charts; and \textbf{(C)} \href{https://mjskay.github.io/ggdist/articles/dotsinterval.html}{dots}, such as dotplots and beeswarm charts. Myriad combinations of these are possible, leading to charts like \textbf{(D)} \href{https://lnalborczyk.github.io/post/glm/}{\textit{logit dotplots}} and \textbf{(E)} \textit{raincloud plots}~\cite{allen2019raincloud}.%
   }
   \label{fig:teaser}
 }
@@ -811,7 +811,7 @@ ggplot() +
 \hfill\break
 
 
-If we plot this on a log scale, i.e. plot $Y = \log(X)$, we should hope to see a Gaussian density with a median of $10^0 = 1$ (since medians are preserved under transformation). However, because \textit{ggplot2} has no way to know this function is a density (nor does it necessarily know the derivative of the scale function), the resulting density will be incorrect:
+If we plot this on a log scale, i.e. plot $Y = \log(X)$, we should hope to see a Gaussian density with a median of $10^0 = 1$ (since medians are preserved under transformation). However, because \textit{ggplot2} has no way to know this function is a density (nor if it did, does it know the derivative of the scale function), the resulting density will be incorrect:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
@@ -830,7 +830,7 @@ ggplot() +
   \end{minipage}
 \hfill\break
 
-The line at 1 does not divide the area into two regions with equal mass, as it would if it were the median. I have no doubt this has led to errors amongst \textit{ggplot2} users.\footnote{For example, \textit{ggplot2} \href{https://github.com/tidyverse/ggplot2/issues/4783}{issue \#4783} is written by a user asking why a theoretical density and samples from a distribution do not line up under transformation---a less attentive user may never have noticed.} Fortunately, \textit{ggdist} does know how to correctly transform densities. It uses a combination of symbolic and (as a fallback) numeric methods to calculate derivatives of \textit{ggplot2} scale transformations to adjust densities.\footnote{Specifically, \textit{ggdist} applies R's built-in \texttt{D} function to get the symbolic derivative of the expression defining the scale function and, if that fails, uses \texttt{numDeriv::jacobian}~\cite{gilbert2016numderiv}. In the future, if my \href{https://github.com/r-lib/scales/pull/341}{pull request \#341} to the \textit{scales} package is accepted, derivatives of scale functions will be offloaded into the guts of \textit{ggplot2} and simultaneously made more reliable.} As a result, we can visualize a log-transformed log-Normal density and get the correct result:
+The line at 1 does not divide the area into two regions with equal mass, as it would if it were the median. I have no doubt this has led to errors amongst \textit{ggplot2} users.\footnote{For example, \textit{ggplot2} \href{https://github.com/tidyverse/ggplot2/issues/4783}{issue \#4783} is written by a user asking why a theoretical density and samples from a distribution do not line up under transformation---a less attentive user may never have noticed.} Fortunately, \textit{ggdist} does know how to correctly transform densities. It uses a combination of symbolic and (as a fallback) numerical methods to calculate derivatives of \textit{ggplot2} scale transformations to adjust densities.\footnote{Specifically, \textit{ggdist} applies R's built-in \texttt{D} function to get the symbolic derivative of the expression defining the scale function and, if that fails, uses \texttt{numDeriv::jacobian}~\cite{gilbert2016numderiv}. In the future, if my \href{https://github.com/r-lib/scales/pull/341}{pull request \#341} to the \textit{scales} package is accepted, derivatives of scale functions will be offloaded into the guts of \textit{ggplot2} and simultaneously made more reliable.} As a result, we can visualize a log-transformed log-Normal density and get the correct result:
 
 \noindent
 \begin{minipage}{.5\columnwidth}
