@@ -139,7 +139,10 @@
 
 \newcommand{\equationfigure}[2]{%
 \noindent
-\begin{minipage}{.5\columnwidth}#1\end{minipage}%
+\begin{minipage}{.5\columnwidth}
+\setlength{\abovedisplayskip}{0}
+\setlength{\belowdisplayskip}{0}
+#1\end{minipage}%
 \begin{minipage}{.4\columnwidth}\centering #2 \end{minipage}%
 \vspace{.5\belowdisplayskip}\\
 }
