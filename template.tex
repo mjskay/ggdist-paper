@@ -568,11 +568,6 @@ This may seem manifestly silly, but there's something to the idea of making disc
 
 My hope in the preceding sections was to whet your appetite for the expressive power of an uncertainty visualization grammar grounded in distributions, both of probability and of confidence. It was not intended as a tutorial (hence the paucity of code), but to give a taste for the underlying formalism of \textit{ggdist}, how it can help us think about uncertainty visualizations, and how it extends the grammar of graphics in a principled way to support fluid specification of a variety of uncertainty visualizations. For more examples, and specifically for examples with code, the interested reader (hopefully you!) can check out the vignettes in the \href{https://mjskay.github.io/ggdist/}{\textit{ggdist} documentation}, which includes a slew of examples not covered here, and in the \href{https://mjskay.github.io/tidybayes/}{\textit{tidybayes} documentation}, which includes examples of the use of \textit{ggdist} with Bayesian models.
 
-\section{How does all this work, anyway?}
-\label{sec:implementation}
-
-The interested implementer might refer to 
-
 \section{Use in the wild}
 \label{sec:use-in-the-wild}
 
@@ -581,6 +576,17 @@ The interested implementer might refer to
 I sometimes wonder if the best way to validate visualization ideas is to deploy them into the world and wait to see what happens (as Munzner puts it---to see what users do of their own accord~\cite{munzner2009nested}). Yet, given the vagaries of research project timelines, most systems in \textsc{vis} do not have this luxury---understandably so, lest we wait 10 years to graduate a PhD student. While there are examples of wildly successful systems that came out of visualization research (e.g. \textit{d3}~\cite{bostock2011d3}, \textit{Vega-lite}~\cite{satyanarayan2016vega}), few systems have both the generality and reach of those exemplars. I think \textit{ggdist} falls somewhere in the middle: it has been deployed for several years and enjoys a modest following. This gives me the opportunity to look at some coarse---but naturalistic---data on usage.
 
 \textit{ggdist} currently sees about 14,000 downloads per month from \textsc{cran}~\cite{csardi2019cranlogs} (up from just a few thousand on original launch in 2020, piggy-backing on \textit{tidybayes}' already-established community at the time). Per Google Scholar, it has been cited 46 times (and \textit{tidybayes} 236 times).\footnote{These are all citations of the software itself: neither package has had a paper written about it---yet.} Its Github project has been starred \textasciitilde 620 times, putting it in the company of popular packages like \textit{cowplot} (\textasciitilde 640), \textit{ggalt} (\textasciitilde 630), and \textit{ggtext} (\textasciitilde 600) in the \href{https://exts.ggplot2.tidyverse.org/gallery/}{\textit{ggplot2} extension gallery}. On Github, \textit{ggdist} has 169 issues in its issue tracker, not counting the 305 issues in \textit{tidybayes} (of which many issues prior to \textit{ggdist} splitting from \textit{tidybayes }were \textit{ggdist}-related). Issues especially can be a sign of user engagement, because projects without broader engagement will have issues opened only by the author. To better understand that engagement, I exported all issues from \textit{ggdist} (see \href{https://github.com/mjskay/ggdist/issues}{Github} or the supplement) and read back through them, engaging in a light tagging process based on what I recalled about those issues.
+
+
+\begin{figure*}[t!]
+\vspace*{-10pt}
+\includegraphics[width=\textwidth]{figs/4-slab_pipeline.pdf}
+\vspace*{-17pt}
+\caption{Flow of data through the visualization construction pipeline for a simple use of \texttt{ggdist::stat\_slab}. The \texttt{layer}, part of \textit{ggplot2}, applies initial aesthetic mappings, translating the input data into columns understood by \texttt{stat\_slab}, which then constructs a much larger data frame containing evaluations of distribution functions over a grid for each distribution. \texttt{layer} applies a second set of aesthetic mappings, then \texttt{geom\_slab} uses the final data frame to construct the plot.}
+\vspace*{-13pt}
+\label{fig:implementation}
+\end{figure*}
+
 
 Of the 169 issues on Github, 79 (47\%) were opened by someone other than me; there were 45 unique authors, excluding me. A further 16 issues were opened by me in direct response to some user need, either flowing from a comment on another issue or from a conversation I had with a user on another platform, often Twitter.\footnote{I spend possibly too much time on \texttt{\#rstats} Twitter engaging with data scientists around visualization problems.} Thus, just over half of all issues on \textit{ggdist}'s tracker stem from user engagement with the package---and from a variety of users. I roughly categorized the types of issues (with some overlap) as follows:
 
@@ -606,6 +612,11 @@ After further discussion, I settled on the $x_\textsc{dist}$ and $y_\textsc{dist
 About 9 months after I opened it, prompted by a conversation on Twitter, a \textit{ggdist} user posted some examples of plots they might be able to create if the issue were resolved. After a productive brainstorming about the design of discrete distribution displays, I implemented a feature in \textit{ggdist} whereby histograms of discrete theoretical distributions are treated as a type of density plot: a stepped version of their probability mass function is available through the same mappings used for density functions of continuous distributions. This integrates discrete distributions into the same broader framework used to construct other visualization types in \textit{ggdist}, meaning I was able to resolve the issue without creating new special cases for handling discrete distributions from the users' perspective.
 
 Several other issues and features have stemmed from interactions of this kind, including interactions with other R package authors who make use of \textit{ggdist}  (15 other packages, not including \textit{tidybayes}, depend on \textit{ggdist}). Overall, I think \textit{ggdist} has garnered a modest following, and I owe a great debt to community for contributing to its development.
+
+\section{How does all this work, anyway?}
+\label{sec:implementation}
+
+The interested implementer might refer to 
 
 \section{Reflections and lessons learned}
 
