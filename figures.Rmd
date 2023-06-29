@@ -471,7 +471,7 @@ m_mpg = brm(
   data = cars, 
   iter = 5000, 
   cores = 4, 
-  save_model = "models/m_mpg.rds",
+  file = "models/m_mpg.rds",
   seed = 3142013
 )
 ```
