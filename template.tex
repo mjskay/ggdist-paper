@@ -582,7 +582,7 @@ I sometimes wonder if the best way to validate visualization ideas is to deploy 
 \vspace*{-10pt}
 \includegraphics[width=\textwidth]{figs/4-slab_pipeline.pdf}
 \vspace*{-17pt}
-\caption{Flow of data through the visualization construction pipeline for a simple use of \texttt{ggdist::stat\_slab}. The \texttt{layer}, part of \textit{ggplot2}, applies initial aesthetic mappings, translating the input data into columns understood by \texttt{stat\_slab}, which then constructs a much larger data frame containing evaluations of distribution functions over a grid for each distribution. \texttt{layer} applies a second set of aesthetic mappings, then \texttt{geom\_slab} uses the final data frame to construct the plot.}
+\caption{Flow of data through the visualization construction pipeline for a simple use of \texttt{ggdist::stat\_slab}. The \texttt{layer}, part of \textit{ggplot2}, applies initial aesthetic mappings, translating the input data into columns understood by \texttt{stat\_slab}, which then constructs a much larger data frame containing evaluations of distribution functions over an \textit{x} grid for each distribution (the user can specify the grid size if needed; the default size is 501). Then, \texttt{layer} applies a second set of aesthetic mappings, and \texttt{geom\_slab} uses the final data frame to construct the plot.}
 \vspace*{-13pt}
 \label{fig:implementation}
 \end{figure*}
@@ -617,6 +617,8 @@ Several other issues and features have stemmed from interactions of this kind, i
 \label{sec:implementation}
 
 The interested implementer might refer to 
+
+Add bit about gradient rendering and reference Paul Murrell's article
 
 \section{Reflections and lessons learned}
 
