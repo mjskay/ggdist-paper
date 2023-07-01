@@ -745,7 +745,7 @@ ggsave("figs/4-slab.pdf", device = cairo_pdf)
 
 ### Jacobians
 
-```{r 3-jacobian-lognorm, fig.width=2.5, fig.height = 1}
+```{r 3-jacobian-lognorm, fig.width=2.5, fig.height = 1.25}
 p = ggplot() +
   stat_function(fun = \(x) dlnorm(x, 0, 1), n = 1000, fill = "gray75", geom = "area") +
   geom_vline(xintercept = 1, color = label_color, linewidth = 0.5) +
@@ -758,7 +758,7 @@ p
 ggsave("figs/3-jacobian-lognorm.pdf", device = cairo_pdf)
 ```
 
-```{r 3-jacobian-incorrect, fig.width=2.5, fig.height = 1}
+```{r 3-jacobian-incorrect, fig.width=2.5, fig.height = 1.25}
 p = ggplot() +
   stat_function(fun = \(x) dlnorm(x, 0, 1), n = 1000, geom = "area", fill = "gray75") +
   geom_vline(xintercept = 1, color = label_color, linewidth = 0.5) +
@@ -771,7 +771,7 @@ p
 ggsave("figs/3-jacobian-incorrect.pdf", device = cairo_pdf)
 ```
 
-```{r 3-jacobian-correct, fig.width=2.5, fig.height = 1}
+```{r 3-jacobian-correct, fig.width=2.5, fig.height = 1.25}
 p = ggplot() +
   stat_slab(aes(xdist = dist_lognormal(0, 1)), scale = 1, fill = "gray75") +
   geom_vline(xintercept = 1, color = label_color, linewidth = 0.5) +
