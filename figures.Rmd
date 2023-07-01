@@ -374,7 +374,9 @@ ggsave("figs/2-xmin_xmax_interval.pdf", device = cairo_pdf)
 
 ### Intervals
 
-```{r 3-geom_pointinterval_quantiles, fig.height = 1.5, fig.width = 2.5}
+Interval with manually-calculated quantile interval:
+
+```{r 3-geom_pointinterval_quantiles, fig.height = 1.75, fig.width = 2.5}
 p = data.frame(a = dist_normal(0, 1)) |>
   ggplot(aes(xdist = a)) +
   stat_pointinterval(.width = .95, justification = 0.65) +
@@ -390,6 +392,7 @@ p = data.frame(a = dist_normal(0, 1)) |>
 p
 ggsave("figs/3-geom_pointinterval_quantiles.pdf", device = cairo_pdf)
 ```
+Two intervals using mass mapped onto linewidth (still manually calculated):
 
 ```{r 3-stat_pointinterval_linewidth, fig.height = 2.5, fig.width = 2.5}
 p = data.frame(a = dist_normal(0, 1)) |>
@@ -407,7 +410,9 @@ p
 ggsave("figs/3-stat_pointinterval_linewidth.pdf", device = cairo_pdf)
 ```
 
-```{r 3-stat_pointinterval_color, fig.height = 1.5, fig.width = 2.5}
+Three intervals using mass mapped onto color:
+
+```{r 3-stat_pointinterval_color, fig.height = 1.25, fig.width = 2.5}
 p = data.frame(a = dist_normal(0, 1)) |>
   ggplot(aes(xdist = a)) +
   stat_pointinterval(aes(interval_color = after_stat(level)), linewidth = 18, .width = c(.5, .8, .95)) +
@@ -419,9 +424,9 @@ p = data.frame(a = dist_normal(0, 1)) |>
 p
 ggsave("figs/3-stat_pointinterval_color.pdf", device = cairo_pdf)
 ```
+Two intervals on distribution $M$:
 
-
-```{r 3-stat_pointinterval_A, fig.height = 2, fig.width = 2.5}
+```{r 3-stat_pointinterval_A, fig.height = 1.75, fig.width = 2.5}
 p = data.frame(a = dist_normal(0, 1)) |>
   ggplot(aes(xdist = a)) +
   stat_pointinterval() +
@@ -434,7 +439,9 @@ p
 ggsave("figs/3-stat_pointinterval_A.pdf", device = cairo_pdf)
 ```
 
-```{r 3-stat_pointinterval_normal, fig.height = 2, fig.width = 2.5}
+Two intervals on distribution $\textrm{Normal}(\mu, \sigma)$:
+
+```{r 3-stat_pointinterval_normal, fig.height = 1.75, fig.width = 2.5}
 p = data.frame(a = dist_normal(0, 1)) |>
   ggplot(aes(xdist = a)) +
   stat_pointinterval() +
@@ -446,6 +453,7 @@ p = data.frame(a = dist_normal(0, 1)) |>
 p
 ggsave("figs/3-stat_pointinterval_normal.pdf", device = cairo_pdf)
 ```
+
 
 ```{r 3-stat_pointinterval_student_t, fig.height = 1, fig.width = 2.5}
 p = data.frame(a = dist_student_t(6, 0, 1)) |>
@@ -516,6 +524,8 @@ ggsave("figs/3-lineribbon_fan.pdf", device = cairo_pdf)
 
 ### Slabs
 
+Two density plots:
+
 ```{r slab_density_two_groups, fig.width = 2.5, fig.height = 2}
 two_a = data.frame(
   nu = c(8, 60),
@@ -541,7 +551,9 @@ p
 ggsave("figs/3-slab_density_two_groups.pdf", device = cairo_pdf)
 ```
 
-```{r slab_gradient_two_groups, fig.width = 2.5, fig.height = 1.5}
+Color gradient density plots:
+
+```{r slab_gradient_two_groups, fig.width = 2.5, fig.height = 1.25}
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab(aes(alpha = !!p_(x)), thickness = 1, side = "both", fill_type = "gradient", scale = 0.7) +
@@ -557,7 +569,7 @@ ggsave("figs/3-slab_gradient_two_groups.pdf", device = cairo_pdf)
 
 Correll gradients
 
-```{r slab_gradient_correll, fig.width = 2.5, fig.height = 1.5}
+```{r slab_gradient_correll, fig.width = 2.5, fig.height = 1.25}
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab(aes(alpha = - pmax(abs(2*!!Pr_(X <= x) - 1), .95)), thickness = 1, side = "both", fill_type = "gradient", scale = 0.7) +
@@ -648,7 +660,7 @@ ggsave("figs/3-slab_raindrop.pdf", device = cairo_pdf)
 
 Fuzzygrams:
 
-```{r slab_fuzzygram, fig.width = 2.5, fig.height = 1.5}
+```{r slab_fuzzygram, fig.width = 2.5, fig.height = 1.25}
 p = two_a |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_slab(aes(alpha = !!Pr_(X > x)), thickness = 1, side = "both", fill_type = "gradient", scale = 0.7) +
@@ -691,7 +703,9 @@ ggsave("figs/3-slab_rope.pdf", device = cairo_pdf)
 
 ### Dotplots
 
-```{r dots_two, fig.width = 2.5, fig.height = 2}
+Two dotplots:
+
+```{r dots_two, fig.width = 2.5, fig.height = 1.65}
 p = two_a_zero |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma), y = group)) +
   stat_dots(quantiles = 100) +
@@ -703,8 +717,9 @@ p
 ggsave("figs/3-dots_two.pdf", device = cairo_pdf)
 ```
 
+Dotplots with emoji:
 
-```{r dots_emoji, fig.width = 2.5, fig.height = 2}
+```{r dots_emoji, fig.width = 2.5, fig.height = 1.65}
 p = two_a_zero |>
   filter(group == "b") |>
   ggplot(aes(xdist = dist_student_t(nu, mu, sigma))) +
@@ -714,16 +729,23 @@ p = two_a_zero |>
   scale_y_continuous(breaks = NULL, expand = expansion(0.01)) +
   scale_shape_manual(
     values = c("FALSE" = "😧", "TRUE" = "🙂"), 
-    guide = guide_legend(reverse = TRUE, title.hjust = 0.92, override.aes = list(linewidth = 4))
+    guide = guide_legend(reverse = TRUE, title.hjust = 0.92, override.aes = list(linewidth = 3))
   ) +
   labs(x = NULL, y = NULL) +
-  theme(legend.position = c(0.85,0.8)) 
+  theme(
+    legend.position = c(0.85,0.8), 
+    legend.spacing.x = unit(4, 'pt'), 
+    legend.spacing.y = unit(4, 'pt'), 
+    legend.key.size = unit(14, "pt")
+  ) 
 
 p
 ggsave("figs/3-dots_emoji.png", device = agg_png, dpi = 900)
 ```
 
 ## Implementation
+
+Helske-esque interval-density plots used for the implementation figure:
 
 ```{r slab_implementation, fig.width = 2.5, fig.height = 1.5}
 p = two_a |>
@@ -745,6 +767,8 @@ ggsave("figs/4-slab.pdf", device = cairo_pdf)
 
 ### Jacobians
 
+Log-normal distribution on the original scale (using `stat_function()`):
+
 ```{r 3-jacobian-lognorm, fig.width=2.5, fig.height = 1.25}
 p = ggplot() +
   stat_function(fun = \(x) dlnorm(x, 0, 1), n = 1000, fill = "gray75", geom = "area") +
@@ -758,6 +782,8 @@ p
 ggsave("figs/3-jacobian-lognorm.pdf", device = cairo_pdf)
 ```
 
+Incorrect log-normal distribution on the log scale (using `stat_function()`):
+
 ```{r 3-jacobian-incorrect, fig.width=2.5, fig.height = 1.25}
 p = ggplot() +
   stat_function(fun = \(x) dlnorm(x, 0, 1), n = 1000, geom = "area", fill = "gray75") +
@@ -770,6 +796,8 @@ p = ggplot() +
 p
 ggsave("figs/3-jacobian-incorrect.pdf", device = cairo_pdf)
 ```
+
+Correct log-normal distribution on the log scale (using `stat_slab()`):
 
 ```{r 3-jacobian-correct, fig.width=2.5, fig.height = 1.25}
 p = ggplot() +
