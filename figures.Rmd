@@ -2,7 +2,11 @@
 title: "Figures for the ggdist paper"
 author: "Matthew Kay"
 date: "2023-03-11"
-output: html_document
+output: 
+  html_document:
+    theme: lumen
+    toc: true
+    self_contained: true
 ---
 
 ## Introduction
@@ -19,7 +23,7 @@ library(ggdist)              # obviously
 library(distributional)      # for dist_...
 library(dplyr)               # for data manipulation
 library(sysfonts)            # for using custom fonts
-library(brms)
+library(brms)                # for brm() (model-fitting)
 library(posterior)           # rvar
 library(patchwork)
 library(ggtext)              # element_textbox_simple
@@ -94,7 +98,9 @@ label_ = function(..., hjust = 0, color = label_color, family = "serif") {
 
 ## Teaser
 
-### slabinterval
+This section creates the subfigures used to create the teaser figure.
+
+### Slabinterval
 
 ```{r slabinterval_teaser, echo=FALSE, fig.height=4, fig.width=4}
 dists_df = tibble(
@@ -175,7 +181,7 @@ dists_plot = dists_df %>%
 ggsave("figs/teaser-slabinterval.pdf", device = cairo_pdf)
 ```
 
-### wee people
+### Wee people
 
 Based on my [wee people example](https://github.com/mjskay/uncertainty-examples/blob/master/weepeople_dotplots.md).
 
@@ -205,7 +211,7 @@ people_letters = c(letters, LETTERS)
 
 Then a plot:
 
-```{r fig.width = 4.0, fig.height = 2.9}
+```{r teaser_weepeople, fig.width = 4.0, fig.height = 2.9}
 p = people_df |>
   ggplot(aes(x = x, y = set, group = set, shape = icon, color = x > 0)) + 
   geom_dots(family = "weepeople", dotsize = 2.4, layout = "swarm")+ 
@@ -219,9 +225,9 @@ ggsave("figs/teaser-weepeople.pdf", plot = p, device = cairo_pdf, width = 4.0, h
 
 
 
-### rainclouds
+### Rainclouds
 
-```{r fig.width = 6.5, fig.height = 4}
+```{r teaser_raincloud, fig.width = 6.5, fig.height = 4}
 set.seed(12345) # for reproducibility
 
 p = data.frame(
@@ -238,9 +244,9 @@ ggsave("figs/teaser-raincloud.pdf", device = cairo_pdf)
 ```
 
 
-### fit lines
+### Fit lines
 
-```{r fig.width = 6, fig.height = 4}
+```{r teaser_mtcars_lines, fig.width = 6, fig.height = 4}
 m_mpg = lm(mpg ~ hp * cyl, data = mtcars)
 p = mtcars %>%
   group_by(cyl) %>%
@@ -267,17 +273,21 @@ p
 ggsave("figs/teaser-mtcars-lines.pdf", device = cairo_pdf)
 ```
 
-### logit dotplots
+### Logit dotplots
 
 Fit model:
 
 ```{r}
 gentoo = penguins %>%
   filter(species == "Gentoo", !is.na(sex))
+
 m = glm(sex == "male" ~ body_mass_g, data = gentoo, family = binomial)
 m
 ```
-```{r fig.width = 5, fig.height = 1.75}
+
+Logit dotplots:
+
+```{r teaser_logit_dotplots, fig.width = 5, fig.height = 1.75}
 # construct a prediction grid for the fit line
 prediction_grid = with(gentoo, 
   data.frame(body_mass_g = seq(min(body_mass_g), max(body_mass_g), length.out = 100))
@@ -338,6 +348,8 @@ ggsave("figs/2-mpg_v_weight.pdf", device = cairo_pdf)
 
 ### Uncertainty as she is spoke
 
+The (mean, sd) approach:
+
 ```{r 2-mean_sd_interval, fig.height = 1.25, fig.width = 2.5}
 p = data.frame(a = dist_normal(0, 1)) |>
   ggplot(aes(xdist = a)) +
@@ -352,6 +364,8 @@ p = data.frame(a = dist_normal(0, 1)) |>
 p
 ggsave("figs/2-mean_sd_interval.pdf", device = cairo_pdf)
 ```
+
+The magic numbers approach:
 
 ```{r 2-xmin_xmax_interval, fig.height = 1.25, fig.width = 2.5}
 p = data.frame(a = dist_normal(0, 1)) |>
