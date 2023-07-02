@@ -350,14 +350,14 @@ t_{\nu}(\mu, \sigma) &\rightarrow x_\textsc{dist}\\
 \textsc{stat} &= \mathit{pointinterval}
 \end{align*}
 }{\includegraphics[width=1.2\columnwidth]{figs/3-stat_pointinterval_student_t.pdf}}
-Which in \textit{ggdist} is:
+In \textit{ggdist} code, the aesthetic specification closely matches this abstract notation: \verb|aes(xdist = dist_student_t(nu, mu, sigma))|.
 
-\begin{centerverbatim}
-ggplot(data) +
-  aes(xdist = dist_student_t(nu, mu, sigma)) +
-  stat_pointinterval()
-\end{centerverbatim}
-Thus the code matches up closely to the abstract notation.
+%\begin{centerverbatim}
+%ggplot(data) +
+%  aes(xdist = dist_student_t(nu, mu, sigma)) +
+%  stat_pointinterval()
+%\end{centerverbatim}
+%Thus the code matches up closely to the abstract notation.
 
 \subsection{Ribbons}
 
