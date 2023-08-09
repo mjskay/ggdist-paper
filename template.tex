@@ -604,7 +604,7 @@ I sometimes wonder if the best way to validate visualization ideas is to deploy 
 \vspace*{-10pt}
 \includegraphics[width=\textwidth]{figs/4-slab_pipeline.pdf}
 \vspace*{-17pt}
-\caption{Flow of data through the visualization construction pipeline for Helske~\cite{helske2021can}-style interval+density plot using \texttt{ggdist::stat\_slab}. The \texttt{layer}, part of \textit{ggplot2}, applies initial aesthetic mappings, translating input data into columns understood by \texttt{stat\_slab}, which then constructs a larger data frame containing evaluations of distribution functions over an \textit{x} grid for each distribution (the user can specify the grid size if needed; the default size is 501). Then, \texttt{layer} applies a second set of aesthetic mappings, and \texttt{geom\_slab} uses the final data frame to construct the plot.}
+\caption{Flow of data through the visualization construction pipeline for a Helske~\cite{helske2021can}-style interval+density plot using \texttt{ggdist::stat\_slab}. The \texttt{layer}, part of \textit{ggplot2}, applies initial aesthetic mappings, translating input data into columns understood by \texttt{stat\_slab}, which then constructs a larger data frame containing evaluations of distribution functions over an \textit{x} grid for each distribution (the user can specify the grid size if needed; the default size is 501). Then, \texttt{layer} applies a second set of aesthetic mappings, and \texttt{geom\_slab} uses the final data frame to construct the plot.}
 \vspace*{-13pt}
 \label{fig:implementation}
 \end{figure*}
@@ -791,7 +791,7 @@ I would like to thank various folks who have used, given feedback on, or contrib
 }
 
 
-\bibliographystyle{abbrv-doi}
+\bibliographystyle{abbrv-doi-hyperref}
 %\bibliographystyle{abbrv-doi-hyperref-narrow}
 %\bibliographystyle{abbrv-doi}
 %\bibliographystyle{abbrv-doi-narrow}
